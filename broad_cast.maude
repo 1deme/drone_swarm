@@ -1,0 +1,23 @@
+mod BROADCAST is
+  protecting PROPAGATION .
+
+  vars C C' : Configuration .
+  var T : Tree .
+  var B : Box .
+  var R : Rat .
+  var O : Oid .
+  var V : Vector .
+  var AS : AttributeSet .
+  var BEl : Rat .
+
+  op broadcastAll : Configuration Box Rat -> Configuration .
+  eq broadcastAll(C, B, R) = flatten(broadcastLoop(C, buildTree(C, B), R)) .
+
+  op broadcastLoop : Configuration Tree Rat -> Tree .
+
+  eq broadcastLoop(none, T, R) = T .
+
+  eq broadcastLoop(< O : Drone | pos: V , belief: BEl , AS > C, T, R) = 
+     broadcastLoop(C, deliver(dMsg(O, V, BEl), R, T), R) .
+
+endm

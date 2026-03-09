@@ -1,0 +1,2 @@
+rewrite [30] in DRONE-SYSTEM : {< d(1) : Drone | pos: v(0, 0),estPos: v(0, 0),goalPos: v(10, 10),belief: 1,speed: 1,heading: stop,inbox:
+    emptyMsg >,0} .

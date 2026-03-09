@@ -1,0 +1,34 @@
+mod DRONE is
+  protecting GEOMETRY .
+  protecting CONFIGURATION .
+
+  sort Dir8 .
+  ops N NE E SE S SW W NW stop : -> Dir8 [ctor] .
+
+  sorts DroneMsg DroneMsgSet .
+  subsort DroneMsg < DroneMsgSet .
+  op emptyMsg : -> DroneMsgSet [ctor] .
+  op _;_ : DroneMsgSet DroneMsgSet -> DroneMsgSet [assoc comm id: emptyMsg] .
+  
+  op dMsg : Oid Vector Rat -> DroneMsg [ctor] . 
+
+  op Drone : -> Cid [ctor] .
+  
+  --- These are now standard Maude Attributes
+  op pos:_ : Vector -> Attribute [ctor] .
+  op estPos:_ : Vector -> Attribute [ctor] .
+  op goalPos:_ : Vector -> Attribute [ctor] .
+  op belief:_ : Rat -> Attribute [ctor] .
+  op speed:_ : Rat -> Attribute [ctor] .
+  op heading:_ : Dir8 -> Attribute [ctor] .
+  op inbox:_ : DroneMsgSet -> Attribute [ctor] .
+  
+  op d : Nat -> Oid [ctor] .
+
+  var O : Oid . 
+  var V : Vector . 
+  var AS : AttributeSet .
+
+  op getPos : Object -> Vector .
+  eq getPos(< O : Drone | pos: V , AS >) = V .
+endm

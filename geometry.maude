@@ -1,0 +1,33 @@
+fmod GEOMETRY is
+  protecting RAT .
+  
+  sorts Vector Box .
+  op v : Rat Rat -> Vector [ctor] .
+
+  op box : Rat Rat Rat Rat -> Box [ctor] . 
+
+  vars X Y X1 Y1 X2 Y2 MinX MinY MaxX MaxY Cx Cy R V : Rat .
+
+  op _+_ : Vector Vector -> Vector .
+  eq v(X1, Y1) + v(X2, Y2) = v(X1 + X2, Y1 + Y2) .
+
+  op _-_ : Vector Vector -> Vector .
+  eq v(X1, Y1) - v(X2, Y2) = v(X1 - X2, Y1 - Y2) .
+
+  op _*_ : Vector Rat -> Vector .
+  eq v(X, Y) * R = v(X * R, Y * R) .
+
+  op distSq : Vector Vector -> Rat .
+  eq distSq(v(X1, Y1), v(X2, Y2)) = ((X1 - X2) * (X1 - X2)) + ((Y1 - Y2) * (Y1 - Y2)) .
+
+  op clamp : Rat Rat Rat -> Rat .
+  eq clamp(V, MinX, MaxX) = if V < MinX then MinX else (if V > MaxX then MaxX else V fi) fi .
+
+  op intersects : Vector Rat Box -> Bool .
+  eq intersects(v(Cx, Cy), R, box(MinX, MinY, MaxX, MaxY)) =
+    distSq(v(Cx, Cy), v(clamp(Cx, MinX, MaxX), clamp(Cy, MinY, MaxY))) <= (R * R) .
+
+  op inBox : Vector Box -> Bool .
+  eq inBox(v(X, Y), box(MinX, MinY, MaxX, MaxY)) =
+    (X >= MinX) and (X <= MaxX) and (Y >= MinY) and (Y <= MaxY) .
+endfm

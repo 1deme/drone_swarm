@@ -1,0 +1,31 @@
+mod PROPAGATION is
+  protecting QUADTREE .
+
+  vars NW NE SW SE : Tree .
+  vars B : Box .
+  vars Origin P : Vector .
+  vars R : Rat .
+  var Src : Oid .
+  var AS : AttributeSet .
+  var I : DroneMsgSet .
+  var Data : Rat .
+  var O : Oid . --- Added O as a variable for the receiver
+
+  op deliver : DroneMsg Rat Tree -> Tree .
+
+  eq deliver(M:DroneMsg, R, empty) = empty .
+
+  ceq deliver(dMsg(Src, Origin, Data), R, node(B, NW, NE, SW, SE)) =
+      node(B, deliver(dMsg(Src, Origin, Data), R, NW),
+              deliver(dMsg(Src, Origin, Data), R, NE),
+              deliver(dMsg(Src, Origin, Data), R, SW),
+              deliver(dMsg(Src, Origin, Data), R, SE))
+    if intersects(Origin, R, B) .
+
+  --- FIXED: Added "O =/= Src" so the drone ignores its own message
+  ceq deliver(dMsg(Src, Origin, Data), R, leaf(< O : Drone | pos: P, inbox: I, AS >)) =
+      leaf(< O : Drone | pos: P, inbox: (I ; dMsg(Src, Origin, Data)), AS >)
+    if distSq(Origin, P) <= (R * R) /\ O =/= Src .
+
+  eq deliver(M:DroneMsg, R, T:Tree) = T:Tree [owise] .
+endm

@@ -1,0 +1,49 @@
+mod QUADTREE is
+  protecting DRONE .
+
+  sort Tree .
+  op empty : -> Tree [ctor] .
+  op leaf : Object -> Tree [ctor] .
+  op node : Box Tree Tree Tree Tree -> Tree [ctor] . 
+
+  vars MinX MinY MaxX MaxY MidX MidY : Rat .
+  var B : Box . var Obj Obj1 Obj2 : Object . 
+  var C : Configuration .
+  vars NW NE SW SE : Tree .
+
+  op getMidX : Box -> Rat .
+  op getMidY : Box -> Rat .
+  eq getMidX(box(MinX, MinY, MaxX, MaxY)) = (MinX + MaxX) / 2 .
+  eq getMidY(box(MinX, MinY, MaxX, MaxY)) = (MinY + MaxY) / 2 .
+
+  op insert : Object Tree Box -> Tree .
+
+  eq insert(Obj, empty, B) = leaf(Obj) .
+
+  --- Case: Leaf -> Shatter into 4 quadrants and re-insert both
+  eq insert(Obj1, leaf(Obj2), B) =
+     insert(Obj1, insert(Obj2, node(B, empty, empty, empty, empty), B), B) .
+
+  --- Case: Node -> Put drone in correct quadrant
+  ceq insert(Obj, node(box(MinX, MinY, MaxX, MaxY), NW, NE, SW, SE), box(MinX, MinY, MaxX, MaxY)) =
+      if inBox(getPos(Obj), box(MinX, MidY, MidX, MaxY)) then
+         node(box(MinX, MinY, MaxX, MaxY), insert(Obj, NW, box(MinX, MidY, MidX, MaxY)), NE, SW, SE)
+      else if inBox(getPos(Obj), box(MidX, MidY, MaxX, MaxY)) then
+         node(box(MinX, MinY, MaxX, MaxY), NW, insert(Obj, NE, box(MidX, MidY, MaxX, MaxY)), SW, SE)
+      else if inBox(getPos(Obj), box(MinX, MinY, MidX, MidY)) then
+         node(box(MinX, MinY, MaxX, MaxY), NW, NE, insert(Obj, SW, box(MinX, MinY, MidX, MidY)), SE)
+      else 
+         node(box(MinX, MinY, MaxX, MaxY), NW, NE, SW, insert(Obj, SE, box(MidX, MinY, MaxX, MidY)))
+      fi fi fi
+    if MidX := getMidX(box(MinX, MinY, MaxX, MaxY)) /\ MidY := getMidY(box(MinX, MinY, MaxX, MaxY)) .
+
+  op buildTree : Configuration Box -> Tree .
+  eq buildTree(none, B) = empty .
+  eq buildTree(Obj C, B) = insert(Obj, buildTree(C, B), B) .
+
+  op flatten : Tree -> Configuration .
+  eq flatten(empty) = none .
+  eq flatten(leaf(Obj)) = Obj .
+  eq flatten(node(B, NW, NE, SW, SE)) = 
+     flatten(NW) flatten(NE) flatten(SW) flatten(SE) .
+endm
