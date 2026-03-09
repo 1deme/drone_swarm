@@ -1,7 +1,7 @@
 mod DRONE-BRAIN is
   protecting BROADCAST .
 
-  vars P P2 G : Vector .
+  vars P P2 G EP : Vector .
   vars O O2 : Oid .
   vars B B2 S currDist nextDist : Rat .
   vars H H1 H2 NEW-H : Dir8 .
@@ -49,12 +49,12 @@ mod DRONE-BRAIN is
     else (if nextDist < currDist then 1/4 else 1/1 fi) * fuzzyScale(B) fi .
 
   op think : Object -> Object .
-  ceq think(< O : Drone | pos: P, goalPos: G, belief: B, speed: S, heading: H, inbox: MS, AS >) =
-            < O : Drone | pos: P, goalPos: G, belief: B, 
-                          speed: calcSpeed(distSq(P, getPos(M)), distSq(P + dirToVec(NEW-H), getPos(M)), B), 
+  ceq think(< O : Drone | pos: P, estPos: EP, goalPos: G, belief: B, speed: S, heading: H, inbox: MS, AS >) =
+            < O : Drone | pos: P, estPos: EP, goalPos: G, belief: B, 
+                          speed: calcSpeed(distSq(EP, getPos(M)), distSq(EP + dirToVec(NEW-H), getPos(M)), B), 
                           heading: NEW-H, 
                           inbox: emptyMsg, AS >
-    if NEW-H := bestDir(P, G) /\ M := findDanger(P, NEW-H, MS) .
+    if NEW-H := bestDir(EP, G) /\ M := findDanger(EP, NEW-H, MS) .    
     
   op betterDir : Vector Vector Dir8 Dir8 -> Dir8 .
   eq betterDir(P, G, H1, H2) = 

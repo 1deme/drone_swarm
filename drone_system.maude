@@ -1,6 +1,7 @@
 mod DRONE-SYSTEM is
   protecting DRONE-BRAIN .
   protecting NAT .
+  protecting RANDOM .
 
   sort System .
   op { _ , _ } : Configuration Nat -> System [ctor] .
@@ -12,7 +13,7 @@ mod DRONE-SYSTEM is
   vars H NEW-H : Dir8 .
   var AS AS' : AttributeSet .
   var ID ID1 : Oid .
-  var T : Nat .
+  var T Seed : Nat .
 
   op worldBox : -> Box .
   eq worldBox = box(0, 0, 20, 20) .
@@ -20,8 +21,8 @@ mod DRONE-SYSTEM is
   op radioRange : -> Rat .
   eq radioRange = 5 .
 
-  op doStep : Configuration Vector -> Configuration .
-  eq doStep(C, W) = moveAll(thinkAll(broadcastAll(C, worldBox, radioRange)), W) .
+  op doStep : Configuration Vector Nat -> Configuration .
+  eq doStep(C, W, T) = moveAll(thinkAll(broadcastAll(restoreSignals(C, T), worldBox, radioRange)), W) .
 
   op thinkAll : Configuration -> Configuration .
   eq thinkAll(none) = none .
@@ -38,10 +39,17 @@ mod DRONE-SYSTEM is
      moveAll(C, W) .
 
 
-  rl [tick-calm] : { C , T } => { doStep(C, v(0, 1/10)) , T + 1 } .
-  rl [tick-east] : { C , T } => { doStep(C, v(1/10, 0)) , T + 1 } .
-  rl [tick-west] : { C , T } => { doStep(C, v(-1/10, 0)) , T + 1 } .
+  rl [tick-calm] : { C , T } => { doStep(C, v(0, 0), T) , T + 1 } .
+  rl [tick-east] : { C , T } => { doStep(C, v(1/10, 0), T) , T + 1 } .
+  rl [tick-west] : { C , T } => { doStep(C, v(-1/10, 0), T) , T + 1 } .
 
+  op restoreSignals : Configuration Nat -> Configuration .
+  eq restoreSignals(none, Seed) = none .
+  
+  eq restoreSignals(< ID : Drone | pos: P, estPos: EP, belief: B, AS > C, Seed) =
+     if (random(Seed) rem 100) < 5 
+     then < ID : Drone | pos: P, estPos: P, belief: 1, AS > restoreSignals(C, Seed + 1)
+     else < ID : Drone | pos: P, estPos: EP, belief: B, AS > restoreSignals(C, Seed + 1) fi .
 
   ceq { < ID : Drone | pos: P, AS > < ID1 : Drone | pos: P', AS' > C , T } = { C , T } 
     if distSq(P, P') < 1/4 .
