@@ -14,7 +14,6 @@ mod DRONE is
 
   op Drone : -> Cid [ctor] .
   
-  --- These are now standard Maude Attributes
   op pos:_ : Vector -> Attribute [ctor] .
   op estPos:_ : Vector -> Attribute [ctor] .
   op goalPos:_ : Vector -> Attribute [ctor] .

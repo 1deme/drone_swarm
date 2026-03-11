@@ -20,11 +20,9 @@ mod QUADTREE is
 
   eq insert(Obj, empty, B) = leaf(Obj) .
 
-  --- Case: Leaf -> Shatter into 4 quadrants and re-insert both
   eq insert(Obj1, leaf(Obj2), B) =
      insert(Obj1, insert(Obj2, node(B, empty, empty, empty, empty), B), B) .
 
-  --- Case: Node -> Put drone in correct quadrant
   ceq insert(Obj, node(box(MinX, MinY, MaxX, MaxY), NW, NE, SW, SE), box(MinX, MinY, MaxX, MaxY)) =
       if inBox(getPos(Obj), box(MinX, MidY, MidX, MaxY)) then
          node(box(MinX, MinY, MaxX, MaxY), insert(Obj, NW, box(MinX, MidY, MidX, MaxY)), NE, SW, SE)

@@ -9,7 +9,7 @@ mod PROPAGATION is
   var AS : AttributeSet .
   var I : DroneMsgSet .
   var Data : Rat .
-  var O : Oid . --- Added O as a variable for the receiver
+  var O : Oid .
 
   op deliver : DroneMsg Rat Tree -> Tree .
 
@@ -22,7 +22,6 @@ mod PROPAGATION is
               deliver(dMsg(Src, Origin, Data), R, SE))
     if intersects(Origin, R, B) .
 
-  --- FIXED: Added "O =/= Src" so the drone ignores its own message
   ceq deliver(dMsg(Src, Origin, Data), R, leaf(< O : Drone | pos: P, inbox: I, AS >)) =
       leaf(< O : Drone | pos: P, inbox: (I ; dMsg(Src, Origin, Data)), AS >)
     if distSq(Origin, P) <= (R * R) /\ O =/= Src .
