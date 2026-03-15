@@ -13,6 +13,7 @@ mod DRONE-SYSTEM is
   var AS AS' : AttributeSet .
   var ID ID1 : Oid .
   var T : Nat .
+  var MS : DroneMsgSet .
 
   op worldBox : -> Box .
   eq worldBox = box(0, 0, 40, 40) .

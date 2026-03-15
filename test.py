@@ -99,7 +99,8 @@ def visualize_flight(initial_str, final_str):
 
 initial_config = """
 
-{ < d(1) : Drone | pos: v(10,10), estPos: v(0,0), goalPos: v(5,7), belief: 1, speed: 0, heading: stop, inbox: emptyMsg, none > , 0 }
+{ < d(1) : Drone | pos: v(14, 14), estPos: v(14, 14), goalPos: v(20, 20), belief: 1/4, speed: 0/1, heading: stop, inbox: emptyMsg > , 0 }
+
 """
 
 final_config = """

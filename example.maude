@@ -1,2 +1,49 @@
-search [2] { < d(1) : Drone | pos: v(10,10), estPos: v(0,0), goalPos: v(5,7), belief: 1, speed: 0, heading: stop, inbox: emptyMsg, none > , 0 } 
- =>* { C:Configuration , 10 } .
+---check if signal recovery works
+search [1, 20] 
+  { < d(1) : Drone | pos: v(9, 9), estPos: v(9, 9), goalPos: v(20, 20), belief: 1/4, speed: 1/1, heading: stop, inbox: emptyMsg > , 0 } 
+=>* { < d(1) : Drone | pos: P, estPos: EP, goalPos: W, belief: 99/100, speed: S, heading: H, inbox: MS > C , T } .
+
+---check if they will colide when they have same target
+search [1, 15] 
+  { < d(1) : Drone | pos: v(10, 10), estPos: v(10, 10), goalPos: v(12, 12), belief: 1/1, speed: 0/1, heading: stop, inbox: emptyMsg > 
+    < d(2) : Drone | pos: v(14, 14), estPos: v(14, 14), goalPos: v(12, 12), belief: 1/1, speed: 0/1, heading: stop, inbox: emptyMsg > , 0 } 
+=>* { none , T } .
+
+---does belife and position estimation get better for lost drone. using other swram member
+search [1, 15] 
+  { < d(1) : Drone | pos: v(2, 8), estPos: v(4, 8), goalPos: v(4, 2), belief: 1/100, speed: 1/2, heading: stop, inbox: emptyMsg > 
+    < d(2) : Drone | pos: v(4, 1), estPos: v(4, 1), goalPos: v(4, 20), belief: 1/1, speed: 1/2, heading: stop, inbox: emptyMsg > , 0 } 
+=>* { < d(1) : Drone | belief: B, AS > C , T } 
+  such that B > 1/2 .
+
+---how bad can drift get
+
+search [1, 30] 
+  { < d(1) : Drone | pos: v(0, 0), estPos: v(0, 0), goalPos: v(50, 50), belief: 1/1, speed: 0/1, heading: stop, inbox: emptyMsg > , 0 } 
+=>* { < d(1) : Drone | pos: P, estPos: EP, AS > C , T } 
+such that distSq(P, EP) >= 2 .
+
+--- does having more drones help. sometimes
+search [1, 30] 
+  { < d(1) : Drone | pos: v(12, 12), estPos: v(12, 12), goalPos: v(50, 50), 
+                     belief: 1/1, speed: 0/1, heading: stop, inbox: emptyMsg > 
+    < d(2) : Drone | pos: v(9, 9), estPos: v(9, 9), goalPos: v(9, 9), 
+                     belief: 1/1, speed: 0/1, heading: stop, inbox: emptyMsg > 
+    < d(3) : Drone | pos: v(11, 11), estPos: v(11, 11), goalPos: v(50, 50), 
+                     belief: 1/1, speed: 0/1, heading: stop, inbox: emptyMsg > , 0 } 
+=>* { < ID : Drone | pos: P, 
+                     estPos: EP, 
+                     goalPos: G, 
+                     belief: B, 
+                     speed: S, 
+                     heading: H, 
+                     inbox: MS > C , T } 
+  such that distSq(P, EP) >= 2 .
+
+---will swarm sucseed with value greater that 0.8
+  search [1, 25] 
+  { < d(1) : Drone | pos: v(16, 16), estPos: v(16, 16), goalPos: v(20, 20), belief: 1/1, speed: 1/1, heading: stop, inbox: emptyMsg > 
+    < d(2) : Drone | pos: v(18, 15), estPos: v(18, 15), goalPos: v(20, 20), belief: 1/1, speed: 1/1, heading: stop, inbox: emptyMsg > 
+    < d(3) : Drone | pos: v(15, 18), estPos: v(15, 18), goalPos: v(20, 20), belief: 1/1, speed: 1/1, heading: stop, inbox: emptyMsg > , 0 } 
+=>* { C , T } 
+  such that objectiveAccomplished({ C , T }, 3) > 8/10 .
