@@ -1,12 +1,12 @@
 mod BROADCAST is
   protecting PROPAGATION .
 
-  vars C C' : Configuration .
+  vars C : Configuration .
   var T : Tree .
   var B : Box .
   var R : Rat .
   var O : Oid .
-  var V : Vector .
+  vars V EP : Vector . --- V is actual, EP is estimate
   var AS : AttributeSet .
   var BEl : Rat .
 
@@ -17,7 +17,8 @@ mod BROADCAST is
 
   eq broadcastLoop(none, T, R) = T .
 
-  eq broadcastLoop(< O : Drone | pos: V , belief: BEl , AS > C, T, R) = 
-     broadcastLoop(C, deliver(dMsg(O, V, BEl), R, T), R) .
+  --- We extract EP and pass V as the physical 'Origin' for the radio signal
+  eq broadcastLoop(< O : Drone | pos: V , estPos: EP, belief: BEl , AS > C, T, R) = 
+     broadcastLoop(C, deliver(dMsg(O, EP, BEl), V, R, T), R) .
 
 endm
