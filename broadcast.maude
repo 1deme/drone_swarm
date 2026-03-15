@@ -6,7 +6,7 @@ mod BROADCAST is
   var B : Box .
   var R : Rat .
   var O : Oid .
-  vars V EP : Vector . --- V is actual, EP is estimate
+  vars V EP : Vector .
   var AS : AttributeSet .
   var BEl : Rat .
 
@@ -17,7 +17,6 @@ mod BROADCAST is
 
   eq broadcastLoop(none, T, R) = T .
 
-  --- We extract EP and pass V as the physical 'Origin' for the radio signal
   eq broadcastLoop(< O : Drone | pos: V , estPos: EP, belief: BEl , AS > C, T, R) = 
      broadcastLoop(C, deliver(dMsg(O, EP, BEl), V, R, T), R) .
 
