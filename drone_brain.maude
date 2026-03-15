@@ -35,10 +35,11 @@ mod DRONE-BRAIN is
   op findDanger : Vector Dir8 DroneMsgSet -> DroneMsg .
   eq findDanger(P, H, emptyMsg) = dMsg(d(999), v(1000, 1000), 0) .
   
-  eq findDanger(P, H, dMsg(O2, P2, B2) ; MS) =
-     if distSq(P + dirToVec(H), P2) < distSq(P + dirToVec(H), getPos(findDanger(P, H, MS)))
+  ceq findDanger(P, H, dMsg(O2, P2, B2) ; MS) =
+     if distSq(P + dirToVec(H), P2) < distSq(P + dirToVec(H), getPos(M))
      then dMsg(O2, P2, B2)
-     else findDanger(P, H, MS) fi .
+     else M fi 
+     if M := findDanger(P, H, MS) .
 
   op getPos : DroneMsg -> Vector .
   eq getPos(dMsg(O, P, B)) = P .

@@ -1,0 +1,24 @@
+mod SWARM-ANALYSIS is
+  protecting DRONE-SYSTEM .
+
+  vars C : Configuration .
+  vars P G : Vector .
+  vars N T : Nat .
+  var OID : Oid .
+  var AS : AttributeSet .
+  var OBJ : Object .
+
+  op droneSuccess : Object -> Rat .
+  
+  eq droneSuccess(< OID : Drone | pos: P, goalPos: G, AS >) = 
+     1 / (1 + distSq(P, G)) .
+     
+  eq droneSuccess(OBJ) = 0 [owise] .
+
+  op sumSwarm : Configuration -> Rat .
+  eq sumSwarm(none) = 0 .
+  eq sumSwarm(OBJ C) = droneSuccess(OBJ) + sumSwarm(C) .
+
+  op objectiveAccomplished : System Nat -> Rat .
+  eq objectiveAccomplished({ C , T }, N) = sumSwarm(C) / N .
+endm
