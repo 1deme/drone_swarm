@@ -15,13 +15,22 @@ mod DRONE-SYSTEM is
   var T : Nat .
 
   op worldBox : -> Box .
-  eq worldBox = box(0, 0, 20, 20) .
+  eq worldBox = box(0, 0, 40, 40) .
 
   op radioRange : -> Rat .
   eq radioRange = 5 .
 
+  op signalRecovery : Configuration -> Configuration .
+  eq signalRecovery(none) = none .
+  eq signalRecovery(< ID : Drone | pos: P, estPos: EP, belief: B, AS > C) = 
+     (if inBox(P, box(10, 10, 25, 25)) then
+        < ID : Drone | pos: P, estPos: P, belief: 1/1, AS >
+      else
+        < ID : Drone | pos: P, estPos: EP, belief: B, AS >
+      fi) signalRecovery(C) .
+
   op doStep : Configuration Vector -> Configuration .
-  eq doStep(C, W) = moveAll(thinkAll(broadcastAll(C, worldBox, radioRange)), W) .
+  eq doStep(C, W) = moveAll(thinkAll(broadcastAll(signalRecovery(C), worldBox, radioRange)), W) .
 
   op thinkAll : Configuration -> Configuration .
   eq thinkAll(none) = none .
