@@ -1,2 +1,2 @@
 search [2] { < d(1) : Drone | pos: v(10,10), estPos: v(0,0), goalPos: v(5,7), belief: 1, speed: 0, heading: stop, inbox: emptyMsg, none > , 0 } 
- =>* { C:Configuration , 1 } .
+ =>* { C:Configuration , 10 } .

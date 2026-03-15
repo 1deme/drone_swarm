@@ -99,18 +99,13 @@ def visualize_flight(initial_str, final_str):
 
 initial_config = """
 
-{(< d(2) : Drone | pos: v(2, 0),estPos: v(2, 0),goalPos: v(2, 10),belief: 1,speed: 1,heading: N,inbox:
-    emptyMsg > < d(3) : Drone | pos: v(4, 0),estPos: v(4, 0),goalPos: v(4, 10),belief: 1,speed: 1,heading: N,inbox: emptyMsg >) < d(1) :
-    Drone | pos: v(0, 0),estPos: v(0, 0),goalPos: v(0, 10),belief: 1,speed: 1,heading: N,inbox: emptyMsg >,0}
-
+{ < d(1) : Drone | pos: v(10,10), estPos: v(0,0), goalPos: v(5,7), belief: 1, speed: 0, heading: stop, inbox: emptyMsg, none > , 0 }
 """
 
 final_config = """
 
-{< d(1) : Drone | pos: v(17/20, 0),estPos: v(3/4, 0),goalPos: v(10, 0),belief: 19/20,speed: 0,heading: E,inbox: emptyMsg > <
-    d(2) : Drone | pos: v(8/5, 0),estPos: v(3/2, 0),goalPos: v(-10, 0),belief: 19/20,speed: 0,heading: W,inbox: emptyMsg > < d(3) : Drone |
-    pos: v(51/10, 25/4),estPos: v(5, 25/4),goalPos: v(5, 10),belief: 19/20,speed: 1/4,heading: N,inbox: emptyMsg >,5}
-
+< d(1) : Drone | pos: v(14361/1000, 18581/1000),estPos: v(4361/1000, 5581/1000),goalPos: v(5, 7),belief: 7/10,speed: 23/100,heading: N,inbox:
+    emptyMsg >
 """
 
 visualize_flight(initial_config, final_config)
