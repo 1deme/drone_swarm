@@ -1,6 +1,5 @@
-mod DRONE is
+omod DRONE is
   protecting GEOMETRY .
-  protecting CONFIGURATION .
 
   sort Dir8 .
   ops N NE E SE S SW W NW stop : -> Dir8 [ctor] .
@@ -12,22 +11,20 @@ mod DRONE is
   
   op dMsg : Oid Vector Rat -> DroneMsg [ctor] . 
 
-  op Drone : -> Cid [ctor] .
-  
-  op pos:_ : Vector -> Attribute [ctor] .
-  op estPos:_ : Vector -> Attribute [ctor] .
-  op goalPos:_ : Vector -> Attribute [ctor] .
-  op belief:_ : Rat -> Attribute [ctor] .
-  op speed:_ : Rat -> Attribute [ctor] .
-  op heading:_ : Dir8 -> Attribute [ctor] .
-  op inbox:_ : DroneMsgSet -> Attribute [ctor] .
-  
+  class Drone | pos : Vector, estPos : Vector,
+                goalPos : Vector, belief : Rat,
+		speed : Rat, heading : Dir8, inbox : DroneMsgSet .
+
   op d : Nat -> Oid [ctor] .
 
   var O : Oid . 
   var V : Vector . 
-  var AS : AttributeSet .
+  var B : Rat .
 
   op getPos : Object -> Vector .
-  eq getPos(< O : Drone | pos: V , AS >) = V .
-endm
+  eq getPos(< O : Drone | pos : V >) = V .
+
+  op genMessage : Object -> DroneMsg .
+  eq genMessage(< O : Drone | estPos : V, belief : B >) = dMsg(O, V, B) .
+  
+endom

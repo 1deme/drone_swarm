@@ -7,31 +7,26 @@ mod DRONE-SYSTEM is
 
   vars C C' : Configuration . 
   var O : Object .
-  vars P P' EP G W : Vector .
-  vars B S : Rat .
+  vars P P' EP G W BASE-P : Vector .
+  vars B S R : Rat .
   vars H NEW-H : Dir8 .
   var AS AS' : AttributeSet .
   var ID ID1 : Oid .
   var T : Nat .
   var MS : DroneMsgSet .
 
-  op worldBox : -> Box .
-  eq worldBox = box(0, 0, 40, 40) .
-
   op radioRange : -> Rat .
   eq radioRange = 5 .
 
-  op signalRecovery : Configuration -> Configuration .
-  eq signalRecovery(none) = none .
-  eq signalRecovery(< ID : Drone | pos: P, estPos: EP, belief: B, AS > C) = 
-     (if inBox(P, box(10, 10, 25, 25)) then
-        < ID : Drone | pos: P, estPos: P, belief: 1/1, AS >
-      else
-        < ID : Drone | pos: P, estPos: EP, belief: B, AS >
-      fi) signalRecovery(C) .
+  op signalRecovery : Configuration Vector Rat -> Configuration .
+  eq signalRecovery(none, BASE-P, R) = none .
+  eq signalRecovery(< ID : Drone | pos : P, estPos : EP, belief : B, AS > C, BASE-P, R) = 
+     (if distSq(P, BASE-P) <= (R * R) then < ID : Drone | pos : P, estPos : P, belief : 1/1, AS >
+      else < ID : Drone | pos : P, estPos : EP, belief : B, AS >
+      fi) signalRecovery(C, BASE-P, R) .
 
   op doStep : Configuration Vector -> Configuration .
-  eq doStep(C, W) = moveAll(thinkAll(broadcastAll(signalRecovery(C), worldBox, radioRange)), W) .
+  eq doStep(C, W) = moveAll(thinkAll(broadcastAll(signalRecovery(C, v(5, 5), 5), radioRange)), W) .
 
   op thinkAll : Configuration -> Configuration .
   eq thinkAll(none) = none .
@@ -39,12 +34,12 @@ mod DRONE-SYSTEM is
 
   op moveAll : Configuration Vector -> Configuration .
   eq moveAll(none, W) = none .
-  eq moveAll((< ID : Drone | pos: P, estPos: EP, belief: B, speed: S, heading: H, AS > C), W) =
+  eq moveAll((< ID : Drone | pos : P, estPos : EP, belief : B, speed : S, heading : H, AS > C), W) =
      (< ID : Drone | 
-         pos: ((P + (dirToVec(H) * S)) + W), 
-         estPos: (EP + (dirToVec(H) * S)), 
-         belief: (if B > 1/100 then B - 1/100 else 0 fi), 
-         speed: S, heading: H, AS >) 
+         pos : ((P + (dirToVec(H) * S)) + W), 
+         estPos : (EP + (dirToVec(H) * S)), 
+         belief : (if B > 1/10 then B - 1/10 else 0 fi), 
+         speed : S, heading : H, AS >) 
      moveAll(C, W) .
 
 
@@ -53,7 +48,7 @@ mod DRONE-SYSTEM is
   rl [tick-west] : { C , T } => { doStep(C, v(-1/10, 0)) , T + 1 } .
 
 
-  ceq { < ID : Drone | pos: P, AS > < ID1 : Drone | pos: P', AS' > C , T } = { C , T } 
+  ceq { < ID : Drone | pos : P, AS > < ID1 : Drone | pos : P', AS' > C , T } = { C , T } 
     if distSq(P, P') < 1/4 .
 
 endm

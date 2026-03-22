@@ -1,23 +1,33 @@
-mod BROADCAST is
-  protecting PROPAGATION .
+omod BROADCAST is
+  protecting DRONE .
 
-  vars C : Configuration .
-  var T : Tree .
-  var B : Box .
-  var R : Rat .
-  var O : Oid .
-  vars V EP : Vector .
-  var AS : AttributeSet .
-  var BEl : Rat .
+  vars C-REM C-FIN C-FULL : Configuration .
+  vars S-ID R-ID : Oid .
+  vars S-P S-EP R-P : Vector .
+  vars S-B R : Rat .
+  vars MS : DroneMsgSet .
+  vars AS : AttributeSet .
+  var M : DroneMsg .
 
-  op broadcastAll : Configuration Box Rat -> Configuration .
-  eq broadcastAll(C, B, R) = flatten(broadcastLoop(C, buildTree(C, B), R)) .
+  op broadcastAll : Configuration Rat -> Configuration .
+  eq broadcastAll(C-FULL, R) = bc-loop(C-FULL, C-FULL, R) .
 
-  op broadcastLoop : Configuration Tree Rat -> Tree .
+  op bc-loop : Configuration Configuration Rat -> Configuration .
+  eq bc-loop(none, C-FULL, R) = C-FULL .
 
-  eq broadcastLoop(none, T, R) = T .
+  eq bc-loop((< S-ID : Drone | AS > C-REM), C-FULL, R) =
+     bc-loop(C-REM, deliver(genMessage(< S-ID : Drone | AS >), 
+                               getPos(< S-ID : Drone | AS >), 
+                               C-FULL, none, R), R) .
 
-  eq broadcastLoop(< O : Drone | pos: V , estPos: EP, belief: BEl , AS > C, T, R) = 
-     broadcastLoop(C, deliver(dMsg(O, EP, BEl), V, R, T), R) .
+  op deliver : DroneMsg Vector Configuration Configuration Rat -> Configuration .
+  
+  eq deliver(dMsg(S-ID, S-EP, S-B), S-P, (< R-ID : Drone | pos : R-P, inbox : MS, AS > C-REM), C-FIN, R) =
+     if (S-ID =/= R-ID) and (distSq(S-P, R-P) <= (R * R)) then
+        deliver(dMsg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Drone | inbox : (MS ; dMsg(S-ID, S-EP, S-B)), AS > C-FIN), R)
+     else
+        deliver(dMsg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Drone | pos : R-P, inbox : MS, AS > C-FIN), R) fi .
 
-endm
+  eq deliver(M, S-P, none, C-FIN, R) = C-FIN .
+
+endom
