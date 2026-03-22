@@ -1,7 +1,7 @@
 omod BROADCAST is
   protecting DRONE .
 
-  vars C-REM C-FIN C-FULL : Configuration .
+  vars C-REM C-FIN C-CUR C-FULL : Configuration .
   vars S-ID R-ID : Oid .
   vars S-P S-EP R-P : Vector .
   vars S-B R : Rat .
@@ -13,21 +13,16 @@ omod BROADCAST is
   eq broadcastAll(C-FULL, R) = bc-loop(C-FULL, C-FULL, R) .
 
   op bc-loop : Configuration Configuration Rat -> Configuration .
-  eq bc-loop(none, C-FULL, R) = C-FULL .
-
-  eq bc-loop((< S-ID : Drone | AS > C-REM), C-FULL, R) =
-     bc-loop(C-REM, deliver(genMessage(< S-ID : Drone | AS >), 
-                               getPos(< S-ID : Drone | AS >), 
-                               C-FULL, none, R), R) .
+  eq bc-loop(none, C-CUR, R) = C-CUR .
+  eq bc-loop((< S-ID : Drone | AS > C-REM), C-CUR, R) =
+     bc-loop(C-REM, deliver(genMessage(< S-ID : Drone | AS >), getPos(< S-ID : Drone | AS >), C-CUR, none, R), R) .
 
   op deliver : DroneMsg Vector Configuration Configuration Rat -> Configuration .
-  
   eq deliver(dMsg(S-ID, S-EP, S-B), S-P, (< R-ID : Drone | pos : R-P, inbox : MS, AS > C-REM), C-FIN, R) =
      if (S-ID =/= R-ID) and (distSq(S-P, R-P) <= (R * R)) then
         deliver(dMsg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Drone | inbox : (MS ; dMsg(S-ID, S-EP, S-B)), AS > C-FIN), R)
      else
         deliver(dMsg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Drone | pos : R-P, inbox : MS, AS > C-FIN), R) fi .
-
   eq deliver(M, S-P, none, C-FIN, R) = C-FIN .
-
+  
 endom
