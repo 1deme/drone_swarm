@@ -54,7 +54,7 @@ mod DRONE-BRAIN is
   op calcSpeed : Rat Rat Rat -> Rat .
   eq calcSpeed(currDist, nextDist, B) = 
     if currDist < 1 then 0
-    else (if nextDist < currDist then 1/4 else 1/2 fi) * fuzzyScale(B) fi .
+    else (if nextDist < currDist then 1 else 2 fi) * fuzzyScale(B) fi .
 
   op think : Object -> Object .
   ceq think(< O : Drone | pos : P, estPos : EP, goalPos : G, belief : B, speed : S, heading : H, inbox : MS, AS >) =
@@ -69,8 +69,8 @@ mod DRONE-BRAIN is
     /\ LEADER-B := getBelief(BEST-MSG)
     /\ LEADER-P := getPos(BEST-MSG)
     
-    /\ NEW-EP := (if (B < 1/20) and (LEADER-B > 9 / 10) then LEADER-P else EP fi)
-    /\ NEW-B  := (if (B < 1/20) and (LEADER-B > 9 / 10) then (LEADER-B * 9/10) else B fi)
+    /\ NEW-EP := (if (B < 1/4) and (LEADER-B > 3 / 4) then LEADER-P else EP fi)
+    /\ NEW-B  := (if (B < 1/4) and (LEADER-B > 3 / 4) then (LEADER-B * 9/10) else B fi)
     
     /\ NEW-H := bestDir(NEW-EP, G) 
     /\ M := findDanger(NEW-EP, NEW-H, MS) .    

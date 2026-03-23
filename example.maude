@@ -1,7 +1,7 @@
 --- check if signal recovery works
 search [1, 20] 
   { < d(1) : Drone | pos : v(9, 9), estPos : v(9, 9), goalPos : v(5, 5), belief : 1/4, speed : 1/1, heading : stop, inbox : emptyMsg > , 0 } 
-=>* { < d(1) : Drone | pos : P, estPos : EP, goalPos : W, belief : 99/100, speed : S, heading : H, inbox : MS > C , T } .
+=>* { < d(1) : Drone | belief : B, AS > C , T } such that B > 8/10 .
 
 --- check if they will collide when they have same target
 search [1, 15] 

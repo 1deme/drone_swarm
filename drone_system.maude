@@ -26,7 +26,7 @@ mod DRONE-SYSTEM is
       fi) signalRecovery(C, BASE-P, R) .
 
   op doStep : Configuration Vector -> Configuration .
-  eq doStep(C, W) = moveAll(thinkAll(broadcastAll(signalRecovery(C, v(5, 5), 5), radioRange)), W) .
+  eq doStep(C, W) = moveAll(thinkAll(broadcastAll(signalRecovery(C, v(15, 15), 8), radioRange)), W) .
 
   op thinkAll : Configuration -> Configuration .
   eq thinkAll(none) = none .
@@ -38,7 +38,7 @@ mod DRONE-SYSTEM is
      (< ID : Drone | 
          pos : ((P + (dirToVec(H) * S)) + W), 
          estPos : (EP + (dirToVec(H) * S)), 
-         belief : (if B > 1/10 then B - 1/10 else 0 fi), 
+         belief : (if B > 1/50 then B - 1/50 else 0 fi), 
          speed : S, heading : H, AS >) 
      moveAll(C, W) .
 
@@ -49,6 +49,6 @@ mod DRONE-SYSTEM is
 
 
   ceq { < ID : Drone | pos : P, AS > < ID1 : Drone | pos : P', AS' > C , T } = { C , T } 
-    if distSq(P, P') < 1/4 .
+    if distSq(P, P') < 1/10 .
 
 endm
