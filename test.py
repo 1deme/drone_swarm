@@ -29,11 +29,12 @@ def extract_drones(text):
         # Look for attributes specifically, allowing for flexible spacing/newlines
         pos_match = re.search(r"pos\s*:\s*(v\([^)]+\))", attr_block)
         est_match = re.search(r"estPos\s*:\s*(v\([^)]+\))", attr_block)
-
+        goal_match = re.search(r"goalPos\s*:\s*(v\([^)]+\))", attr_block)
         if pos_match:
             drones[d_id] = {
                 'pos': parse_maude_vector(pos_match.group(1)),
-                'est': parse_maude_vector(est_match.group(1)) if est_match else (0.0, 0.0)
+                'est': parse_maude_vector(est_match.group(1)) if est_match else (0.0, 0.0),
+                'goal': parse_maude_vector(goal_match.group(1)) if goal_match else (0.0, 0.0)
             }
             
     return drones
@@ -53,10 +54,14 @@ def visualize_flight(initial_str, final_str):
     
     for d_id in start_data:
         s_pos = start_data[d_id]['pos']
-        
+        g_pos = start_data[d_id]['goal']
+
         # Plot Start
         plt.scatter(s_pos[0], s_pos[1], color='gray', marker='o', s=80, alpha=0.5)
         plt.text(s_pos[0], s_pos[1] + 1.0, f"d({d_id}) Start", fontsize=8, color='gray', ha='center')
+
+        plt.scatter(g_pos[0], g_pos[1], color='red', marker='*', s=150, edgecolors='black', label="Goal" if d_id == '1' else "")
+        plt.text(g_pos[0], g_pos[1] + 1.2, f"d({d_id}) Goal", fontsize=8, color='red', ha='center', fontweight='bold')
 
         if d_id in end_data:
             d = end_data[d_id]
@@ -90,14 +95,14 @@ def visualize_flight(initial_str, final_str):
 
 # --- SPREAD OUT DATA FOR VISIBILITY ---
 initial_config = """
-{ < d(1) : Drone | pos : v(32, 32), estPos : v(32, 32), goalPos : v(15, 15), belief : 1/1, speed : 1/1, heading : stop, inbox : emptyMsg > 
-  < d(2) : Drone | pos : v(28, 12), estPos : v(28, 12), goalPos : v(5, 5), belief : 1/1, speed : 1/1, heading : stop, inbox : emptyMsg > 
-  < d(3) : Drone | pos : v(10, 35), estPos : v(10, 35), goalPos : v(25, 15), belief : 1/1, speed : 1/1, heading : stop, inbox : emptyMsg > , 0 }
-"""
+{ < d(1) : Drone | pos : v(10, 10), estPos : v(10, 10), goalPos : v(25, 25), 
+>            belief : 1/1, speed : 0/1, heading : stop, inbox : emptyMsg > , 0 }"""
 
 final_config = """
-{ < d(1) : Drone | pos : v(25, 27), estPos : v(22, 23), goalPos : v(15, 15), belief : 8/10, speed : 1/2, heading : SW, inbox : emptyMsg > 
-  < d(3) : Drone | pos : v(18, 28), estPos : v(15, 25), goalPos : v(25, 15), belief : 6/10, speed : 1/4, heading : SE, inbox : emptyMsg > , 12 }
-"""
+{< d(1) : Drone | pos : v(15, 15), estPos : v(20, 20), goalPos : v(25, 25), belief : 49/50, speed : 1, heading
+    : SE, inbox : emptyMsg >, 20}
+    """
 
 visualize_flight(initial_config, final_config)
+# rew [20] { < d(1) : Drone | pos : v(10, 10), estPos : v(10, 10), goalPos : v(12, 12), 
+#            belief : 1/1, speed : 0/1, heading : stop, inbox : emptyMsg > , 0 } .

@@ -9,6 +9,9 @@ mod DRONE-BRAIN is
   var MS : DroneMsgSet .
   var M BEST-MSG : DroneMsg .
 
+  --- fuzzy logic control. These functions convert the "Belief" (B) value (from 0 to 1) 
+  --- into a scaling factor for the drone's speed.
+
   op muLost : Rat -> Rat .
   eq muLost(B) = if B <= 1/4 then 1 else (if B >= 1/2 then 0 else (1/2 - B) * 4 fi) fi .
 
@@ -17,6 +20,11 @@ mod DRONE-BRAIN is
 
   op muConfident : Rat -> Rat .
   eq muConfident(B) = if B <= 1/2 then 0 else (if B >= 3/4 then 1 else (B - 1/2) * 4 fi) fi .
+
+  --- Defuzzification: Calculates the final speed multiplier.
+  --- Confident drones move at 100% speed (1)
+  --- Wary drones move at 50% speed (1/2)
+  --- Lost drones crawl at 10% speed (1/10) to reduce error.
 
   op fuzzyScale : Rat -> Rat .
   eq fuzzyScale(B) = (muConfident(B) * 1) + (muWary(B) * 1/2) + (muLost(B) * 1/10) .
@@ -38,12 +46,14 @@ mod DRONE-BRAIN is
   op getPos : DroneMsg -> Vector .
   eq getPos(dMsg(O, P, B)) = P .
 
+  ---find most confident drone you can communicate with.
   op findBestMsg : DroneMsgSet -> DroneMsg .
   eq findBestMsg(emptyMsg) = dMsg(d(999), v(0,0), 0) .
   ceq findBestMsg(dMsg(O2, P2, B2) ; MS) =
      if B2 > getBelief(M) then dMsg(O2, P2, B2) else M fi 
      if M := findBestMsg(MS) .
 
+  ---find most dangerous closest drone for you.
   op findDanger : Vector Dir8 DroneMsgSet -> DroneMsg .
   eq findDanger(P, H, emptyMsg) = dMsg(d(999), v(1000, 1000), 0) .
   ceq findDanger(P, H, dMsg(O2, P2, B2) ; MS) =
@@ -51,6 +61,8 @@ mod DRONE-BRAIN is
      then dMsg(O2, P2, B2) else M fi 
      if M := findDanger(P, H, MS) .
 
+  ---use fuzzy scale to calculate next speed. if you are getting closer then speed must be lowered. 
+  ---if you are getting further away you can gain speed.
   op calcSpeed : Rat Rat Rat -> Rat .
   eq calcSpeed(currDist, nextDist, B) = 
     if currDist < 1 then 0
@@ -68,18 +80,22 @@ mod DRONE-BRAIN is
     if BEST-MSG := findBestMsg(MS)
     /\ LEADER-B := getBelief(BEST-MSG)
     /\ LEADER-P := getPos(BEST-MSG)
-    
+
+    ---change belife and estimated position if your confidence is low but you can communicate with confident drone
+    ---you can get some idea of where you are since you fisically recived radio signal
     /\ NEW-EP := (if (B < 1/4) and (LEADER-B > 3 / 4) then LEADER-P else EP fi)
     /\ NEW-B  := (if (B < 1/4) and (LEADER-B > 3 / 4) then (LEADER-B * 9/10) else B fi)
     
     /\ NEW-H := bestDir(NEW-EP, G) 
     /\ M := findDanger(NEW-EP, NEW-H, MS) .    
     
+  ---pass currentPosition desired posiiton and Two candidate directions. check which puts you closes to desired position
   op betterDir : Vector Vector Dir8 Dir8 -> Dir8 .
   eq betterDir(P, G, H1, H2) = 
     if distSq(P + dirToVec(H1), G) < distSq(P + dirToVec(H2), G) 
     then H1 else H2 fi .
 
+  ---check for each direction
   op bestDir : Vector Vector -> Dir8 .
   eq bestDir(P, G) = 
     betterDir(P, G, 

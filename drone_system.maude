@@ -18,6 +18,7 @@ mod DRONE-SYSTEM is
   op radioRange : -> Rat .
   eq radioRange = 5 .
 
+  ---add area where there is perfect signal. if drone goes in to that area then belife is set to 1 and estpost to actualpos
   op signalRecovery : Configuration Vector Rat -> Configuration .
   eq signalRecovery(none, BASE-P, R) = none .
   eq signalRecovery(< ID : Drone | pos : P, estPos : EP, belief : B, AS > C, BASE-P, R) = 
@@ -25,9 +26,11 @@ mod DRONE-SYSTEM is
       else < ID : Drone | pos : P, estPos : EP, belief : B, AS >
       fi) signalRecovery(C, BASE-P, R) .
 
+  ---first check if you recovered signal. then broadcast information. make desition and apply that desition
   op doStep : Configuration Vector -> Configuration .
   eq doStep(C, W) = moveAll(thinkAll(broadcastAll(signalRecovery(C, v(15, 15), 8), radioRange)), W) .
 
+  ---iterate on drones for each to think
   op thinkAll : Configuration -> Configuration .
   eq thinkAll(none) = none .
   eq thinkAll(O C) = think(O) thinkAll(C) . 
@@ -36,18 +39,18 @@ mod DRONE-SYSTEM is
   eq moveAll(none, W) = none .
   eq moveAll((< ID : Drone | pos : P, estPos : EP, belief : B, speed : S, heading : H, AS > C), W) =
      (< ID : Drone | 
-         pos : ((P + (dirToVec(H) * S)) + W), 
-         estPos : (EP + (dirToVec(H) * S)), 
-         belief : (if B > 1/50 then B - 1/50 else 0 fi), 
-         speed : S, heading : H, AS >) 
+         pos : ((P + (dirToVec(H) * S)) + W), ---new position is calculated using actual position directoin speed and wind
+         estPos : (EP + (dirToVec(H) * S)),   ---estPost can not mesure wind or know actual position. so it uses estpos dir and speed
+         belief : (if B > 1/50 then B - 1/50 else 0 fi),  ---belife degrades
+         speed : S, heading : H, AS >) ---speed was set in brain so no change 
      moveAll(C, W) .
 
-
+  ---there can be many types of wind. which creates nondeterminism.
   rl [tick-calm] : { C , T } => { doStep(C, v(0, 1/10)) , T + 1 } .
   rl [tick-east] : { C , T } => { doStep(C, v(1/10, 0)) , T + 1 } .
   rl [tick-west] : { C , T } => { doStep(C, v(-1/10, 0)) , T + 1 } .
 
-
+  ---check for collitions. and remove drones if they colided
   ceq { < ID : Drone | pos : P, AS > < ID1 : Drone | pos : P', AS' > C , T } = { C , T } 
     if distSq(P, P') < 1/10 .
 

@@ -8,6 +8,8 @@ mod SWARM-ANALYSIS is
   var AS : AttributeSet .
   var OBJ : Object .
 
+  --- for mesuring succes of whole swarm. assign succes to each individual from 0 to 1 sum those numbers up and divide by drones
+  --- number of drones you started with. you will no longer have drones that crashed so they will not increase sum.
   op droneSuccess : Object -> Rat .
   
   eq droneSuccess(< OID : Drone | pos: P, goalPos: G, AS >) = 
