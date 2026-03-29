@@ -1,6 +1,5 @@
 omod FUSION-LOGIC is
   protecting DRONE .
-  --- We need to be very explicit about Rat vs Int
   protecting RAT .
 
   vars O : Oid .
@@ -13,7 +12,7 @@ omod FUSION-LOGIC is
   eq trustThreshold = 1/1 . 
 
   op consensusBonus : -> Rat .
-  eq consensusBonus = 1/100 .
+  eq consensusBonus = 1/50 .
 
   --- sum all beliefs (Added explicit 0/1)
   op sumWeights : DroneMsgSet -> Rat .
@@ -35,7 +34,8 @@ omod FUSION-LOGIC is
   op calcBelief : Object -> Rat .
   ceq calcBelief(< O : Drone | belief : B, inbox : MS >) = 
     (if (W >= trustThreshold) 
-     then (if (B + consensusBonus > 1/1) then 1/1 else (B + consensusBonus) fi) 
+     then (if (B + (consensusBonus * W) > 1/1) then 1/1 else (B + (consensusBonus * W)) fi) 
      else B fi)
     if W := sumWeights(MS) .
+    
 endom

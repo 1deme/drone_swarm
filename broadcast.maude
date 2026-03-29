@@ -14,15 +14,19 @@ omod BROADCAST is
 
   op bc-loop : Configuration Configuration Rat -> Configuration .
   eq bc-loop(none, C-CUR, R) = C-CUR .
-  eq bc-loop((< S-ID : Drone |  > C-REM), C-CUR, R) =
-     bc-loop(C-REM, deliver(genMessage(< S-ID : Drone |  >), getPos(< S-ID : Drone | >), C-CUR, none, R), R) .
+  
+  --- 1. Build the dMsg directly here! No need for genMessage or getPos
+  eq bc-loop((< S-ID : Drone | pos : S-P, estPos : S-EP, belief : S-B, AS > C-REM), C-CUR, R) =
+     bc-loop(C-REM, deliver(dMsg(S-ID, S-EP, S-B), S-P, C-CUR, none, R), R) .
 
   op deliver : DroneMsg Vector Configuration Configuration Rat -> Configuration .
-  eq deliver(dMsg(S-ID, S-EP, S-B), S-P, (< R-ID : Drone | pos : R-P, inbox : MS > C-REM), C-FIN, R) =
+  
+  --- 2. Added AS wildcard to prevent match failure and preserve all other attributes!
+  eq deliver(dMsg(S-ID, S-EP, S-B), S-P, (< R-ID : Drone | pos : R-P, inbox : MS, AS > C-REM), C-FIN, R) =
      if (S-ID =/= R-ID) and (distSq(S-P, R-P) <= (R * R)) then
-        deliver(dMsg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Drone | inbox : (MS ; dMsg(S-ID, S-EP, S-B)) > C-FIN), R)
+        deliver(dMsg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Drone | inbox : (MS ; dMsg(S-ID, S-EP, S-B)), pos : R-P, AS > C-FIN), R)
      else
-        deliver(dMsg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Drone | pos : R-P, inbox : MS > C-FIN), R) fi .
+        deliver(dMsg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Drone | pos : R-P, inbox : MS, AS > C-FIN), R) fi .
   eq deliver(M, S-P, none, C-FIN, R) = C-FIN .
   
 endom
