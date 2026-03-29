@@ -95,13 +95,23 @@ def visualize_flight(initial_str, final_str):
 
 # --- SPREAD OUT DATA FOR VISIBILITY ---
 initial_config = """
-{ < d(1) : Drone | pos : v(10, 10), estPos : v(10, 10), goalPos : v(25, 25), 
->            belief : 1/1, speed : 0/1, heading : stop, inbox : emptyMsg > , 0 }"""
+{ 
+  < d(1) : Drone | 
+      pos : v(25, 30), 
+      estPos : v(25, 25), 
+      goalPos : v(25, 30), 
+      belief : 1/1, 
+      speed : 1/1, 
+      heading : N, 
+      inbox : emptyMsg > , 
+  0 
+}
+
+"""
 
 final_config = """
-{< d(1) : Drone | pos : v(15, 15), estPos : v(20, 20), goalPos : v(25, 25), belief : 49/50, speed : 1, heading
-    : SE, inbox : emptyMsg >, 20}
-    """
+{< d(1) : Drone | pos : v(243/10, 361/10), estPos : v(243/10, 307/10), goalPos : v(25, 30), belief : 4/5, speed : 1,
+    heading : NW, inbox : emptyMsg >, 10}                """
 
 visualize_flight(initial_config, final_config)
 # rew [20] { < d(1) : Drone | pos : v(10, 10), estPos : v(10, 10), goalPos : v(12, 12), 

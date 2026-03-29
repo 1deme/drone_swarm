@@ -1,0 +1,41 @@
+omod FUSION-LOGIC is
+  protecting DRONE .
+  --- We need to be very explicit about Rat vs Int
+  protecting RAT .
+
+  vars O : Oid .
+  vars V : Vector .
+  vars B W : Rat .
+  var MS : DroneMsgSet .
+
+  --- Constants for Tuning (Using explicit Rat notation 1/1)
+  op trustThreshold : -> Rat .
+  eq trustThreshold = 1/1 . 
+
+  op consensusBonus : -> Rat .
+  eq consensusBonus = 1/100 .
+
+  --- sum all beliefs (Added explicit 0/1)
+  op sumWeights : DroneMsgSet -> Rat .
+  eq sumWeights(emptyMsg) = 0/1 .
+  eq sumWeights(dMsg(O, V, B) ; MS) = B + sumWeights(MS) .
+
+  --- sum belief times position
+  op sumWPos : DroneMsgSet -> Vector .
+  eq sumWPos(emptyMsg) = v(0/1, 0/1) .
+  eq sumWPos(dMsg(O, V, B) ; MS) = (V * B) + sumWPos(MS) .
+
+  --- 1. Function for New Estimated Position (WCL)
+  op calcEstPos : Object -> Vector .
+  ceq calcEstPos(< O : Drone | estPos : V, inbox : MS >) = 
+    (if (W >= trustThreshold) then (sumWPos(MS) / W) else V fi)
+    if W := sumWeights(MS) .
+
+  --- 2. Function for New Belief
+  op calcBelief : Object -> Rat .
+  ceq calcBelief(< O : Drone | belief : B, inbox : MS >) = 
+    (if (W >= trustThreshold) 
+     then (if (B + consensusBonus > 1/1) then 1/1 else (B + consensusBonus) fi) 
+     else B fi)
+    if W := sumWeights(MS) .
+endom

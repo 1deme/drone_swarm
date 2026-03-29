@@ -1,9 +1,6 @@
 omod DRONE is
   protecting GEOMETRY .
 
-  sort Dir8 .
-  ops N NE E SE S SW W NW stop : -> Dir8 [ctor] .
-
   sorts DroneMsg DroneMsgSet .
   subsort DroneMsg < DroneMsgSet .
   op emptyMsg : -> DroneMsgSet [ctor] .

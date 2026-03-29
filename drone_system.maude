@@ -50,8 +50,21 @@ mod DRONE-SYSTEM is
   rl [tick-east] : { C , T } => { doStep(C, v(1/10, 0)) , T + 1 } .
   rl [tick-west] : { C , T } => { doStep(C, v(-1/10, 0)) , T + 1 } .
 
-  ---check for collitions. and remove drones if they colided
-  ceq { < ID : Drone | pos : P, AS > < ID1 : Drone | pos : P', AS' > C , T } = { C , T } 
-    if distSq(P, P') < 1/10 .
+  --- 1. Helper: Does this drone hit ANYONE in the provided configuration?
+  op isHit : Object Configuration -> Bool .
+  ceq isHit(< ID : Drone | pos : P, AS >, < ID1 : Drone | pos : P', AS' > C) = true 
+    if ID =/= ID1 /\ distSq(P, P') < 1/10 .
+  eq isHit(O, C) = false [owise] .
+
+  --- 2. Helper: Rebuild the configuration, dropping crashed drones
+  op solve : Configuration Configuration -> Configuration .
+  eq solve(none, C') = none .
+  eq solve(O C, C') = 
+     (if isHit(O, C') then none else O fi) solve(C, C') .
+
+  --- 3. THE REPLACEMENT: Automatic global cleanup
+  ceq { O C , T } = { solve(O C, O C) , T } 
+    if isHit(O, C) .
+    
 
 endm

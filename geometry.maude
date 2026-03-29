@@ -4,6 +4,22 @@ fmod GEOMETRY is
   sorts Vector .
   op v : Rat Rat -> Vector [ctor] .
 
+  sort Dir8 .
+  ops N NE E SE S SW W NW stop : -> Dir8 [ctor] .
+
+
+  op dirToVec : Dir8 -> Vector .
+  eq dirToVec(N)    = v(0, 1) .
+  eq dirToVec(E)    = v(1, 0) .
+  eq dirToVec(S)    = v(0, -1) .
+  eq dirToVec(W)    = v(-1, 0) .
+  eq dirToVec(NE)   = v(7/10, 7/10) .
+  eq dirToVec(SE)   = v(7/10, -7/10) .
+  eq dirToVec(SW)   = v(-7/10, -7/10) .
+  eq dirToVec(NW)   = v(-7/10, 7/10) .
+  eq dirToVec(stop) = v(0, 0) .
+
+
   vars X Y X1 Y1 X2 Y2 R  : Rat .
 
   op _+_ : Vector Vector -> Vector .
@@ -15,7 +31,11 @@ fmod GEOMETRY is
   op _*_ : Vector Rat -> Vector .
   eq v(X, Y) * R = v(X * R, Y * R) .
 
+  op _/_ : Vector Rat -> Vector .
+  eq v(X, Y) / R = v(X / R, Y / R) .
+
   op distSq : Vector Vector -> Rat .
   eq distSq(v(X1, Y1), v(X2, Y2)) = ((X1 - X2) * (X1 - X2)) + ((Y1 - Y2) * (Y1 - Y2)) .
+
 
 endfm
