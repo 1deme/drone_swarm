@@ -7,13 +7,17 @@ mod SWARM-ANALYSIS is
   var OID : Oid .
   var AS : AttributeSet .
   var OBJ : Object .
+  vars X1 Y1 X2 Y2 : Rat .
 
-  --- for mesuring succes of whole swarm. assign succes to each individual from 0 to 1 sum those numbers up and divide by drones
-  --- number of drones you started with. you will no longer have drones that crashed so they will not increase sum.
+  --- Manhattan Distance: |X1 - X2| + |Y1 - Y2|
+  op manhattanDist : Vector Vector -> Rat .
+  eq manhattanDist(v(X1, Y1), v(X2, Y2)) = abs(X1 - X2) + abs(Y1 - Y2) .
+
+  --- Linear success: 1 - (Current Distance / Max Distance)
+  --- Assumes max Manhattan distance of 40 (from 0,0 to 20,20)
   op droneSuccess : Object -> Rat .
-  
   eq droneSuccess(< OID : Drone | pos : P, goalPos : G, AS >) = 
-     1 / (1 + distSq(P, G)) .
+     1 - (manhattanDist(P, G) / 40) .
      
   op sumSwarm : Configuration -> Rat .
   eq sumSwarm(none) = 0 .
