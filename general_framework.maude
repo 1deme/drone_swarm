@@ -21,7 +21,7 @@ omod GENERAL-FRAMEWORK is
                 belief : Rat, speed : Rat, heading : Heading, inbox : AgentMsgSet .
 
   sort System .
-  op { _ , _ } : Configuration Nat -> System [ctor] .
+  op { _ } : Configuration -> System [ctor] .
 
   vars C C' : Configuration . 
   var O : Object .
@@ -76,7 +76,7 @@ omod GENERAL-FRAMEWORK is
   op performStep : Configuration Disturbance -> Configuration .
   eq performStep(C, D) = applyPhysics(thinkAll(broadcastAll(perceiveEnvironment(C))), D) .
 
-  crl [performBigStep] : { C , T } => { performStep(C, D) , T + 1 } 
+  crl [performBigStep] : { C  } => { performStep(C, D) } 
       if D ; DS := possibleDisturbances .
 
   --- 7. Collision Cleanup Phase
@@ -89,6 +89,6 @@ omod GENERAL-FRAMEWORK is
   eq solve(none, C') = none .
   eq solve(O C, C') = (if isHit(O, C') then none else O fi) solve(C, C') .
 
-  ceq { O C , T } = { solve(O C, O C) , T } if isHit(O, C) .
+  ceq { O C } = { solve(O C, O C) } if isHit(O, C) .
 
 endom

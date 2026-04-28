@@ -22,5 +22,5 @@ mod SWARM-ANALYSIS is
   eq sumSwarm(OBJ C) = droneSuccess(OBJ) + sumSwarm(C) .
 
   op objectiveAccomplished : System Nat -> Rat .
-  eq objectiveAccomplished({ C , T }, N) = sumSwarm(C) / N .
+  eq objectiveAccomplished({ C }, N) = sumSwarm(C) / N .
 endm
