@@ -1,13 +1,17 @@
 omod FUZZY-SPEED-CONTROL is
-  --- IMPORTANT: Replace 'DRONE' with the exact name of your drone module
-  protecting DRONE . 
+  protecting GENERAL-FRAMEWORK . 
+  protecting GEOMETRY .
   protecting BOOL .
+
+  --- Link the abstract framework sorts to our specific drone math
+  subsort Vector < Position .
+  subsort Dir8 < Heading .
 
   vars O : Oid .
   vars P DP MyEP DangerEP : Vector .
   vars B MyB DangerB S1 S2 W Strength : Rat .
-  var MS : DroneMsgSet .
-  var M : DroneMsg .
+  var MS : AgentMsgSet .
+  var M : AgentMsg .
   var H : Dir8 .
   vars W1 W2 W3 W4 W5 D : Rat .
 
@@ -15,14 +19,12 @@ omod FUZZY-SPEED-CONTROL is
   --- 1. MEMBERSHIP FUNCTIONS
   --- -----------------------------------------
   
-  --- Proximity (Distance Squared)
   op muNear : Rat -> Rat .
   eq muNear(S1) = if S1 <= 3/10 then 1/1 else (if S1 >= 2/1 then 0/1 else (2/1 - S1) * 10/17 fi) fi .
 
   op muFar : Rat -> Rat .
   eq muFar(S1) = if S1 <= 3/10 then 0/1 else (if S1 >= 2/1 then 1/1 else (S1 - 3/10) * 10/17 fi) fi .
 
-  --- Belief
   op muLost : Rat -> Rat .
   eq muLost(B) = if B <= 1/4 then 1/1 else (if B >= 1/2 then 0/1 else (1/2 - B) * 4/1 fi) fi .
 
@@ -33,7 +35,6 @@ omod FUZZY-SPEED-CONTROL is
   op muConfident : Rat -> Rat .
   eq muConfident(B) = if B <= 1/2 then 0/1 else (if B >= 3/4 then 1/1 else (B - 1/2) * 4/1 fi) fi .
 
-  --- Safety Logic: Is the neighbor getting closer?
   op isClosing : Vector Dir8 Vector -> Bool .
   eq isClosing(P, H, DP) = distSq(P + dirToVec(H), DP) < distSq(P, DP) .
 
@@ -47,8 +48,8 @@ omod FUZZY-SPEED-CONTROL is
   op goalWary      : -> Rat . eq goalWary      = 1/2 .
   op goalCruise    : -> Rat . eq goalCruise    = 1/1 .
 
-  op getWeightedSpeed : Vector Dir8 Rat DroneMsg -> Rat .
-  ceq getWeightedSpeed(P, H, B, dMsg(O, DP, DangerB)) = 
+  op getWeightedSpeed : Vector Dir8 Rat AgentMsg -> Rat .
+  ceq getWeightedSpeed(P, H, B, msg(O, DP, DangerB)) = 
     ( (W1 * goalEmergency) + (W2 * goalLost) + (W3 * goalCaution) + (W4 * goalWary) + (W5 * goalCruise) ) / 
     (W1 + W2 + W3 + W4 + W5)
     if D   := distSq(P, DP)
@@ -62,8 +63,7 @@ omod FUZZY-SPEED-CONTROL is
   --- 3. AGGREGATION
   --- -----------------------------------------
 
-  op evalSpeedSet : Vector Dir8 Rat DroneMsgSet -> Rat .
-  --- Case: No neighbors (Your Aggressive Logic)
+  op evalSpeedSet : Vector Dir8 Rat AgentMsgSet -> Rat .
   eq evalSpeedSet(P, H, B, emptyMsg) = 
      ( (muLost(B) * 1/2) + (muConfident(B) * 1/1) ) / (muLost(B) + muConfident(B)) .
   
@@ -76,6 +76,6 @@ omod FUZZY-SPEED-CONTROL is
   --- 4. MAIN INTERFACE
   --- -----------------------------------------
   op calcSpeed : Object -> Rat .
-  eq calcSpeed(< O : Drone | estPos : P, heading : H, belief : B, inbox : MS >) = 
+  eq calcSpeed(< O : Agent | estPos : P, heading : H, belief : B, inbox : MS >) = 
      evalSpeedSet(P, H, B, MS) .
 endom

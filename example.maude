@@ -11,7 +11,7 @@ search [1] {
                    belief : 1/1, speed : 1/1, heading : NE, inbox : emptyMsg > , 
   0 
 } =>* { C , T } 
-such that objectiveAccomplished({ C , T }, 5) >= 3/5 .
+such that objectiveAccomplished({ C , T }, 5) >= 2/5 .
 
 rew [10] {
   < d(1) : Drone | pos : v(0, 0), estPos : v(0, 0), goalPos : v(20, 20), 

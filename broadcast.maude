@@ -1,32 +1,32 @@
 omod BROADCAST is
-  protecting DRONE .
+  protecting GENERAL-FRAMEWORK .
 
   vars C-REM C-FIN C-CUR C-FULL : Configuration .
   vars S-ID R-ID : Oid .
-  vars S-P S-EP R-P : Vector .
-  vars S-B R : Rat .
-  vars MS : DroneMsgSet .
+  vars S-P S-EP R-P : Position .
+  vars S-B : Rat .
+  vars MS : AgentMsgSet .
   vars AS : AttributeSet .
-  var M : DroneMsg .
+  var M : AgentMsg .
 
-  op broadcastAll : Configuration Rat -> Configuration .
-  eq broadcastAll(C-FULL, R) = bc-loop(C-FULL, C-FULL, R) .
+  --- 1. We implement the abstract broadcastAll defined in the framework
+  eq broadcastAll(C-FULL) = bc-loop(C-FULL, C-FULL) .
 
-  op bc-loop : Configuration Configuration Rat -> Configuration .
-  eq bc-loop(none, C-CUR, R) = C-CUR .
+  op bc-loop : Configuration Configuration -> Configuration .
+  eq bc-loop(none, C-CUR) = C-CUR .
   
-  --- 1. Build the dMsg directly here! No need for genMessage or getPos
-  eq bc-loop((< S-ID : Drone | pos : S-P, estPos : S-EP, belief : S-B, AS > C-REM), C-CUR, R) =
-     bc-loop(C-REM, deliver(dMsg(S-ID, S-EP, S-B), S-P, C-CUR, none, R), R) .
+  eq bc-loop((< S-ID : Agent | pos : S-P, estPos : S-EP, belief : S-B, AS > C-REM), C-CUR) =
+     bc-loop(C-REM, deliver(msg(S-ID, S-EP, S-B), S-P, C-CUR, none)) .
 
-  op deliver : DroneMsg Vector Configuration Configuration Rat -> Configuration .
+  op deliver : AgentMsg Position Configuration Configuration -> Configuration .
   
-  --- 2. Added AS wildcard to prevent match failure and preserve all other attributes!
-  eq deliver(dMsg(S-ID, S-EP, S-B), S-P, (< R-ID : Drone | pos : R-P, inbox : MS, AS > C-REM), C-FIN, R) =
-     if (S-ID =/= R-ID) and (distSq(S-P, R-P) <= (R * R)) then
-        deliver(dMsg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Drone | inbox : (MS ; dMsg(S-ID, S-EP, S-B)), pos : R-P, AS > C-FIN), R)
+  --- 2. We use the abstract 'inCommunicationRange' instead of hardcoding math
+  eq deliver(msg(S-ID, S-EP, S-B), S-P, (< R-ID : Agent | pos : R-P, inbox : MS, AS > C-REM), C-FIN) =
+     if (S-ID =/= R-ID) and inCommunicationRange(S-P, R-P) then
+        deliver(msg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Agent | inbox : (MS ; msg(S-ID, S-EP, S-B)), pos : R-P, AS > C-FIN))
      else
-        deliver(dMsg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Drone | pos : R-P, inbox : MS, AS > C-FIN), R) fi .
-  eq deliver(M, S-P, none, C-FIN, R) = C-FIN .
+        deliver(msg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Agent | pos : R-P, inbox : MS, AS > C-FIN)) fi .
+        
+  eq deliver(M, S-P, none, C-FIN) = C-FIN .
   
 endom

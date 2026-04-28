@@ -1,5 +1,5 @@
 mod SWARM-ANALYSIS is
-  protecting DRONE-SYSTEM .
+  protecting DRONE-INSTANCE .
 
   vars C : Configuration .
   vars P G : Vector .
@@ -9,14 +9,12 @@ mod SWARM-ANALYSIS is
   var OBJ : Object .
   vars X1 Y1 X2 Y2 : Rat .
 
-  --- Manhattan Distance: |X1 - X2| + |Y1 - Y2|
   op manhattanDist : Vector Vector -> Rat .
   eq manhattanDist(v(X1, Y1), v(X2, Y2)) = abs(X1 - X2) + abs(Y1 - Y2) .
 
-  --- Linear success: 1 - (Current Distance / Max Distance)
-  --- Assumes max Manhattan distance of 40 (from 0,0 to 20,20)
   op droneSuccess : Object -> Rat .
-  eq droneSuccess(< OID : Drone | pos : P, goalPos : G, AS >) = 
+  --- Notice the class is now Agent
+  eq droneSuccess(< OID : Agent | pos : P, goalPos : G, AS >) = 
      1 - (manhattanDist(P, G) / 40) .
      
   op sumSwarm : Configuration -> Rat .
@@ -25,5 +23,4 @@ mod SWARM-ANALYSIS is
 
   op objectiveAccomplished : System Nat -> Rat .
   eq objectiveAccomplished({ C , T }, N) = sumSwarm(C) / N .
-  
 endm

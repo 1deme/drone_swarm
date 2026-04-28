@@ -1,0 +1,94 @@
+omod GENERAL-FRAMEWORK is
+  protecting NAT .
+  protecting RAT .
+
+  --- 1. Abstract Sorts
+  sorts Position Heading Disturbance DisturbanceSet .
+  subsort Disturbance < DisturbanceSet .
+  
+  op noneDist : -> DisturbanceSet [ctor] .
+  op _;_ : DisturbanceSet DisturbanceSet -> DisturbanceSet [assoc comm id: noneDist] .
+
+  --- 2. Abstract Messages
+  sorts AgentMsg AgentMsgSet .
+  subsort AgentMsg < AgentMsgSet .
+  op emptyMsg : -> AgentMsgSet [ctor] .
+  op _;_ : AgentMsgSet AgentMsgSet -> AgentMsgSet [assoc comm id: emptyMsg] .
+  op msg : Oid Position Rat -> AgentMsg [ctor] . 
+
+  --- 3. Abstract Agent Class
+  class Agent | pos : Position, estPos : Position, goalPos : Position, 
+                belief : Rat, speed : Rat, heading : Heading, inbox : AgentMsgSet .
+
+  sort System .
+  op { _ , _ } : Configuration Nat -> System [ctor] .
+
+  vars C C' : Configuration . 
+  var O : Object .
+  vars P EP P' : Position .
+  vars B S : Rat .
+  var H : Heading .
+  var AS AS' : AttributeSet .
+  vars ID ID1 : Oid .
+  var T : Nat .
+  var D : Disturbance .
+  var DS : DisturbanceSet .
+
+  --- 4. Abstract Interface (To be implemented by the instance)
+  op hasReliablePerception : Position -> Bool .
+  op inCommunicationRange : Position Position -> Bool .
+  op updatePhysicalState : Position Rat Heading Disturbance -> Position .
+  op estimateNextPosition : Position Rat Heading -> Position .
+  op isCollision : Position Position -> Bool .
+  op possibleDisturbances : -> DisturbanceSet .
+
+  --- 5. The Pipeline Phases
+  --- Phase A: Perception
+  op perceiveEnvironment : Configuration -> Configuration .
+  eq perceiveEnvironment(none) = none .
+  eq perceiveEnvironment(< ID : Agent | pos : P, estPos : EP, belief : B, AS > C) = 
+     (if hasReliablePerception(P) 
+      then < ID : Agent | pos : P, estPos : P, belief : 1/1, AS >
+      else < ID : Agent | pos : P, estPos : EP, belief : B, AS > fi) 
+     perceiveEnvironment(C) .
+
+  --- Phase B: Broadcast (Signature defined here, logic usually relies on inCommunicationRange)
+  op broadcastAll : Configuration -> Configuration .
+
+  --- Phase C: Think
+  op thinkAll : Configuration -> Configuration .
+  op think : Object -> Object . 
+  eq thinkAll(none) = none .
+  eq thinkAll(O C) = think(O) thinkAll(C) .
+
+  --- Phase D: Physics
+  op applyPhysics : Configuration Disturbance -> Configuration .
+  eq applyPhysics(none, D) = none .
+  eq applyPhysics((< ID : Agent | pos : P, estPos : EP, belief : B, speed : S, heading : H, AS > C), D) =
+     (< ID : Agent | 
+         pos : updatePhysicalState(P, S, H, D),
+         estPos : estimateNextPosition(EP, S, H),
+         belief : (if B > 1/50 then B - 1/50 else 0 fi), 
+         speed : S, heading : H, AS >) 
+     applyPhysics(C, D) .
+
+  --- 6. The Synchronous Step Execution
+  op performStep : Configuration Disturbance -> Configuration .
+  eq performStep(C, D) = applyPhysics(thinkAll(broadcastAll(perceiveEnvironment(C))), D) .
+
+  crl [performBigStep] : { C , T } => { performStep(C, D) , T + 1 } 
+      if D ; DS := possibleDisturbances .
+
+  --- 7. Collision Cleanup Phase
+  op isHit : Object Configuration -> Bool .
+  ceq isHit(< ID : Agent | pos : P, AS > , < ID1 : Agent | pos : P' , AS' > C) = true 
+    if ID =/= ID1 /\ isCollision(P , P') .
+  eq isHit(O, C) = false [owise] .
+
+  op solve : Configuration Configuration -> Configuration .
+  eq solve(none, C') = none .
+  eq solve(O C, C') = (if isHit(O, C') then none else O fi) solve(C, C') .
+
+  ceq { O C , T } = { solve(O C, O C) , T } if isHit(O, C) .
+
+endom
