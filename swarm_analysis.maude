@@ -13,7 +13,6 @@ mod SWARM-ANALYSIS is
   eq manhattanDist(v(X1, Y1), v(X2, Y2)) = abs(X1 - X2) + abs(Y1 - Y2) .
 
   op droneSuccess : Object -> Rat .
-  --- Notice the class is now Agent
   eq droneSuccess(< OID : Agent | pos : P, goalPos : G, AS >) = 
      1 - (manhattanDist(P, G) / 40) .
      

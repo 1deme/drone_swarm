@@ -32,7 +32,6 @@ mod DRONE-BRAIN is
       /\ NEW-B  := calcBelief(D)
       /\ NEW-H  := bestDir(NEW-EP, G) .   
       
-  --- Pass current position, desired position, and candidate directions.
   op betterDir : Vector Vector Dir8 Dir8 -> Dir8 .
   eq betterDir(P, G, H1, H2) = 
     if distSq(P + dirToVec(H1), G) < distSq(P + dirToVec(H2), G) 

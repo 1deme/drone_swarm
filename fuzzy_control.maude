@@ -3,7 +3,6 @@ omod FUZZY-SPEED-CONTROL is
   protecting GEOMETRY .
   protecting BOOL .
 
-  --- Link the abstract framework sorts to our specific drone math
   subsort Vector < Position .
   subsort Dir8 < Heading .
 
@@ -14,10 +13,6 @@ omod FUZZY-SPEED-CONTROL is
   var M : AgentMsg .
   var H : Dir8 .
   vars W1 W2 W3 W4 W5 D : Rat .
-
-  --- -----------------------------------------
-  --- 1. MEMBERSHIP FUNCTIONS
-  --- -----------------------------------------
   
   op muNear : Rat -> Rat .
   eq muNear(S1) = if S1 <= 3/10 then 1/1 else (if S1 >= 2/1 then 0/1 else (2/1 - S1) * 10/17 fi) fi .
@@ -38,10 +33,6 @@ omod FUZZY-SPEED-CONTROL is
   op isClosing : Vector Dir8 Vector -> Bool .
   eq isClosing(P, H, DP) = distSq(P + dirToVec(H), DP) < distSq(P, DP) .
 
-  --- -----------------------------------------
-  --- 2. WEIGHTED AVERAGE LOGIC
-  --- -----------------------------------------
-
   op goalEmergency : -> Rat . eq goalEmergency = 1/20 .
   op goalLost      : -> Rat . eq goalLost      = 1/10 .
   op goalCaution   : -> Rat . eq goalCaution   = 3/10 .
@@ -59,10 +50,6 @@ omod FUZZY-SPEED-CONTROL is
     /\ W4  := muWary(B)
     /\ W5  := muFar(D) * muConfident(B) .
 
-  --- -----------------------------------------
-  --- 3. AGGREGATION
-  --- -----------------------------------------
-
   op evalSpeedSet : Vector Dir8 Rat AgentMsgSet -> Rat .
   eq evalSpeedSet(P, H, B, emptyMsg) = 
      ( (muLost(B) * 1/2) + (muConfident(B) * 1/1) ) / (muLost(B) + muConfident(B)) .
@@ -72,9 +59,6 @@ omod FUZZY-SPEED-CONTROL is
     if S1 := getWeightedSpeed(P, H, B, M)
     /\ S2 := evalSpeedSet(P, H, B, MS) .
 
-  --- -----------------------------------------
-  --- 4. MAIN INTERFACE
-  --- -----------------------------------------
   op calcSpeed : Object -> Rat .
   eq calcSpeed(< O : Agent | estPos : P, heading : H, belief : B, inbox : MS >) = 
      evalSpeedSet(P, H, B, MS) .

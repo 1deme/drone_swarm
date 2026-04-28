@@ -7,7 +7,6 @@ fmod GEOMETRY is
   sort Dir8 .
   ops N NE E SE S SW W NW stop : -> Dir8 [ctor] .
 
-
   op dirToVec : Dir8 -> Vector .
   eq dirToVec(N)    = v(0, 1) .
   eq dirToVec(E)    = v(1, 0) .
@@ -18,7 +17,6 @@ fmod GEOMETRY is
   eq dirToVec(SW)   = v(-7/10, -7/10) .
   eq dirToVec(NW)   = v(-7/10, 7/10) .
   eq dirToVec(stop) = v(0, 0) .
-
 
   vars X Y X1 Y1 X2 Y2 R  : Rat .
 
@@ -36,6 +34,5 @@ fmod GEOMETRY is
 
   op distSq : Vector Vector -> Rat .
   eq distSq(v(X1, Y1), v(X2, Y2)) = ((X1 - X2) * (X1 - X2)) + ((Y1 - Y2) * (Y1 - Y2)) .
-
 
 endfm

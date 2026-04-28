@@ -9,7 +9,6 @@ omod BROADCAST is
   vars AS : AttributeSet .
   var M : AgentMsg .
 
-  --- 1. We implement the abstract broadcastAll defined in the framework
   eq broadcastAll(C-FULL) = bc-loop(C-FULL, C-FULL) .
 
   op bc-loop : Configuration Configuration -> Configuration .
@@ -20,7 +19,6 @@ omod BROADCAST is
 
   op deliver : AgentMsg Position Configuration Configuration -> Configuration .
   
-  --- 2. We use the abstract 'inCommunicationRange' instead of hardcoding math
   eq deliver(msg(S-ID, S-EP, S-B), S-P, (< R-ID : Agent | pos : R-P, inbox : MS, AS > C-REM), C-FIN) =
      if (S-ID =/= R-ID) and inCommunicationRange(S-P, R-P) then
         deliver(msg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Agent | inbox : (MS ; msg(S-ID, S-EP, S-B)), pos : R-P, AS > C-FIN))

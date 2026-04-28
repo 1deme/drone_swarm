@@ -1,9 +1,8 @@
 omod DRONE-INSTANCE is
   protecting GENERAL-FRAMEWORK .
-  protecting GEOMETRY .      --- Brings in Vector, Dir8, distSq
-  protecting DRONE-BRAIN .   --- Brings in your fuzzy/fusion logic
+  protecting GEOMETRY . 
+  protecting DRONE-BRAIN .
 
-  --- 1. Mapping Abstract Sorts to Concrete Math
   subsort Vector < Position .
   subsort Dir8 < Heading .
 
@@ -15,19 +14,15 @@ omod DRONE-INSTANCE is
   vars H : Dir8 .
   vars W : Vector .
 
-  --- 2. Instantiating Perception (The GPS Zone)
   eq hasReliablePerception(P) = distSq(P, v(15, 15)) <= 64 .
 
-  --- 3. Instantiating Communication (Radio Range)
   eq inCommunicationRange(P1, P2) = distSq(P1, P2) <= 25 .
 
-  --- 4. Instantiating Physics & Dead-Reckoning
   eq updatePhysicalState(P, S, H, wind(W)) = (P + (dirToVec(H) * S)) + W .
   eq estimateNextPosition(EP, S, H) = EP + (dirToVec(H) * S) .
-  --- 5. Instantiating Collision Parameters
+
   eq isCollision(P1, P2) = distSq(P1, P2) < 1/10 .
 
-  --- 6. Defining the Nondeterministic Environment
   eq possibleDisturbances = wind(v(0, 1/10)) ; wind(v(1/10, 0)) ; wind(v(-1/10, 0)) .
 
 endom
