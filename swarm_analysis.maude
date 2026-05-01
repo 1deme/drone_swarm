@@ -2,24 +2,48 @@ mod SWARM-ANALYSIS is
   protecting DRONE-INSTANCE .
 
   vars C : Configuration .
-  vars P G : Vector .
-  vars N T : Nat .
+  vars P G EP : Vector .
+  vars N : Nat .
   var OID : Oid .
   var AS : AttributeSet .
   var OBJ : Object .
   vars X1 Y1 X2 Y2 : Rat .
 
-  op manhattanDist : Vector Vector -> Rat .
-  eq manhattanDist(v(X1, Y1), v(X2, Y2)) = abs(X1 - X2) + abs(Y1 - Y2) .
+  op MAX-SQ-DIST : -> Rat .
+  eq MAX-SQ-DIST = 3200 .
+
+  op TRUST-THRESHOLD-SQ : -> Rat .
+  eq TRUST-THRESHOLD-SQ = 25 .
+
+  op sqEuclideanDist : Vector Vector -> Rat .
+  eq sqEuclideanDist(v(X1, Y1), v(X2, Y2)) = 
+     ((X1 - X2) * (X1 - X2)) + ((Y1 - Y2) * (Y1 - Y2)) .
 
   op droneSuccess : Object -> Rat .
   eq droneSuccess(< OID : Agent | pos : P, goalPos : G, AS >) = 
-     1 - (manhattanDist(P, G) / 40) .
+     1 - (sqEuclideanDist(P, G) / MAX-SQ-DIST) .
      
-  op sumSwarm : Configuration -> Rat .
-  eq sumSwarm(none) = 0 .
-  eq sumSwarm(OBJ C) = droneSuccess(OBJ) + sumSwarm(C) .
+  op sumSwarmSuccess : Configuration -> Rat .
+  eq sumSwarmSuccess(none) = 0 .
+  eq sumSwarmSuccess(OBJ C) = droneSuccess(OBJ) + sumSwarmSuccess(C) .
 
   op objectiveAccomplished : System Nat -> Rat .
-  eq objectiveAccomplished({ C }, N) = sumSwarm(C) / N .
+  eq objectiveAccomplished({ C }, N) = 
+     sumSwarmSuccess(C) / N .
+
+  op droneEpistemicSuccess : Object -> Rat .
+  eq droneEpistemicSuccess(< OID : Agent | pos : P, estPos : EP, AS >) = 
+     if sqEuclideanDist(P, EP) >= TRUST-THRESHOLD-SQ
+     then 0
+     else 1 - (sqEuclideanDist(P, EP) / TRUST-THRESHOLD-SQ)
+     fi .
+
+  op sumEpistemicSuccess : Configuration -> Rat .
+  eq sumEpistemicSuccess(none) = 0 .
+  eq sumEpistemicSuccess(OBJ C) = droneEpistemicSuccess(OBJ) + sumEpistemicSuccess(C) .
+
+  op meanEpistemicSuccess : System Nat -> Rat .
+  eq meanEpistemicSuccess({ C }, N) = 
+     sumEpistemicSuccess(C) / N .
+
 endm
