@@ -18,7 +18,7 @@ omod GENERAL-FRAMEWORK is
                 belief : Rat, speed : Rat, heading : Heading, inbox : AgentMsgSet .
 
   sort System .
-  op { _ } : Configuration -> System [ctor] .
+  op { _|_ } : Configuration Nat -> System [ctor] .
 
   vars C C' : Configuration . 
   var O : Object .
@@ -66,8 +66,10 @@ omod GENERAL-FRAMEWORK is
   op performStep : Configuration Disturbance -> Configuration .
   eq performStep(C, D) = applyPhysics(thinkAll(broadcastAll(perceiveEnvironment(C))), D) .
 
-  crl [performBigStep] : { C } => { performStep(C, D) } 
-      if D ; DS := possibleDisturbances .
+  op continueSimulation : System -> Bool .
+
+  crl [performBigStep] : { C | T } => { performStep(C, D) | T + 1 } 
+      if continueSimulation({ C | T }) /\ D ; DS := possibleDisturbances .
 
   op isHit : Object Configuration -> Bool .
   ceq isHit(< ID : Agent | pos : P, AS > , < ID1 : Agent | pos : P' , AS' > C) = true 
@@ -78,6 +80,6 @@ omod GENERAL-FRAMEWORK is
   eq solve(none, C') = none .
   eq solve(O C, C') = (if isHit(O, C') then none else O fi) solve(C, C') .
 
-  ceq { O C } = { solve(O C, O C) } if isHit(O, C) .
+  ceq { O C | T } = { solve(O C, O C) | T } if isHit(O, C) .
 
 endom

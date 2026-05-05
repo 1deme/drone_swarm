@@ -1,9 +1,11 @@
-search [1] in SWARM-ANALYSIS : {
-  < d(1) : Agent | pos : v(10, 10), estPos : v(0, 0), goalPos : v(20, 20), 
-                   belief : 1/1, speed : 1/1, heading : NE, inbox : emptyMsg >
-  < d(2) : Agent | pos : v(25, 20), estPos : v(1, 0), goalPos : v(15, 15), 
-                   belief : 1/1, speed : 1/1, heading : NE, inbox : emptyMsg >
-  < d(3) : Agent | pos : v(0, 1), estPos : v(0, 1), goalPos : v(10, 10), 
-                   belief : 1/1, speed : 1/1, heading : NE, inbox : emptyMsg >
-} =>* { C } 
-such that objectiveAccomplished({ C }, 5) >= 3/5 .
+search [1] in SWARM-ANALYSIS : 
+  {
+    < d(1) : Agent | pos : v(0, 0), estPos : v(0, 0), goalPos : v(20, 20), 
+                     belief : 1/1, speed : 1/1, heading : NE, inbox : emptyMsg >
+    < d(2) : Agent | pos : v(0, 0), estPos : v(1, 0), goalPos : v(20, 20), 
+                     belief : 1/1, speed : 1/1, heading : NE, inbox : emptyMsg >
+    < d(3) : Agent | pos : v(1, 1), estPos : v(0, 1), goalPos : v(20, 20), 
+                     belief : 1/1, speed : 1/1, heading : NE, inbox : emptyMsg >
+  | 0 } 
+  =>! { C | T } 
+  such that objectiveAccomplished({ C | T }, 3) < 9/10 .

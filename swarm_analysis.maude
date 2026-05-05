@@ -3,7 +3,7 @@ mod SWARM-ANALYSIS is
 
   vars C : Configuration .
   vars P G EP : Vector .
-  vars N : Nat .
+  vars N T : Nat .
   var OID : Oid .
   var AS : AttributeSet .
   var OBJ : Object .
@@ -28,7 +28,7 @@ mod SWARM-ANALYSIS is
   eq sumSwarmSuccess(OBJ C) = droneSuccess(OBJ) + sumSwarmSuccess(C) .
 
   op objectiveAccomplished : System Nat -> Rat .
-  eq objectiveAccomplished({ C }, N) = 
+  eq objectiveAccomplished({ C | T}, N) = 
      sumSwarmSuccess(C) / N .
 
   op droneEpistemicSuccess : Object -> Rat .
@@ -43,7 +43,14 @@ mod SWARM-ANALYSIS is
   eq sumEpistemicSuccess(OBJ C) = droneEpistemicSuccess(OBJ) + sumEpistemicSuccess(C) .
 
   op meanEpistemicSuccess : System Nat -> Rat .
-  eq meanEpistemicSuccess({ C }, N) = 
+  eq meanEpistemicSuccess({ C | T }, N) = 
      sumEpistemicSuccess(C) / N .
+
+  eq continueSimulation({ C | T }) = 
+   if T >= 100 then 
+      false 
+   else 
+      objectiveAccomplished({ C | T }, 3) < 9/10 
+   fi .
 
 endm
