@@ -20,30 +20,30 @@ mod DRONE-BRAIN is
 
   op think : Object -> Object .
   ceq think(D) =
-      < O : Agent | pos : P, 
-                    estPos : NEW-EP, 
-                    goalPos : G, 
-                    belief : NEW-B, 
+      < O : Agent | pos : P,
+                    estPos : NEW-EP,
+                    goalPos : G,
+                    belief : NEW-B,
                     speed : calcSpeed(< O : Agent | estPos : NEW-EP, heading : NEW-H, belief : NEW-B, inbox : MS >), 
-                    heading : NEW-H, 
+                    heading : NEW-H,
                     inbox : emptyMsg >
       if < O : Agent | pos : P, estPos : EP, goalPos : G, belief : B, speed : S, heading : H, inbox : MS > := D
       /\ NEW-EP := calcEstPos(D)
       /\ NEW-B  := calcBelief(D)
-      /\ NEW-H  := bestDir(NEW-EP, G) .   
+      /\ NEW-H  := bestDir(NEW-EP, G) .
       
   op betterDir : Vector Vector Dir8 Dir8 -> Dir8 .
-  eq betterDir(P, G, H1, H2) = 
-    if distSq(P + dirToVec(H1), G) < distSq(P + dirToVec(H2), G) 
+  eq betterDir(P, G, H1, H2) =
+    if distSq(P + dirToVec(H1), G) < distSq(P + dirToVec(H2), G)
     then H1 else H2 fi .
 
   op bestDir : Vector Vector -> Dir8 .
-  eq bestDir(P, G) = 
-    betterDir(P, G, 
-      betterDir(P, G, 
-        betterDir(P, G, N, NE), 
+  eq bestDir(P, G) =
+    betterDir(P, G,
+      betterDir(P, G,
+        betterDir(P, G, N, NE),
         betterDir(P, G, E, SE)),
-      betterDir(P, G, 
-        betterDir(P, G, S, SW), 
+      betterDir(P, G,
+        betterDir(P, G, S, SW),
         betterDir(P, G, W, NW))) .
 endm
