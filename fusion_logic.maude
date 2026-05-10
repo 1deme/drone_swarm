@@ -33,7 +33,7 @@ omod FUSION-LOGIC is
   ceq calcBelief(< O : Agent | belief : B, inbox : MS >) = 
     (if (W >= trustThreshold) 
      then (if (B + (consensusBonus * W) > 1/1) then 1/1 else (B + (consensusBonus * W)) fi) 
-     else B fi)
+     else (if B > 1/50 then B - 1/50 else 0 fi) fi)
     if W := sumWeights(MS) .
     
 endom

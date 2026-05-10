@@ -55,12 +55,10 @@ omod GENERAL-FRAMEWORK is
 
   op applyPhysics : Configuration Disturbance -> Configuration .
   eq applyPhysics(none, D) = none .
-  eq applyPhysics((< ID : Agent | pos : P, estPos : EP, belief : B, speed : S, heading : H, AS > C), D) =
+  eq applyPhysics((< ID : Agent | pos : P, estPos : EP, speed : S, heading : H > C), D) =
      (< ID : Agent | 
          pos : updatePhysicalState(P, S, H, D),
-         estPos : estimateNextPosition(EP, S, H),
-         belief : (if B > 1/50 then B - 1/50 else 0 fi), 
-         speed : S, heading : H, AS >) 
+         estPos : estimateNextPosition(EP, S, H) >) 
      applyPhysics(C, D) .
 
   op performStep : Configuration Disturbance -> Configuration .

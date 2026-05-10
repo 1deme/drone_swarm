@@ -10,7 +10,7 @@ omod DRONE-INSTANCE is
   op d : Nat -> Oid [ctor] .
 
   vars P P1 P2 EP : Vector .
-  vars S : Rat .
+  vars S B : Rat .
   vars H : Dir8 .
   vars W : Vector .
 
@@ -19,6 +19,7 @@ omod DRONE-INSTANCE is
   eq inCommunicationRange(P1, P2) = distSq(P1, P2) <= 25 .
 
   eq updatePhysicalState(P, S, H, wind(W)) = (P + (dirToVec(H) * S)) + W .
+
   eq estimateNextPosition(EP, S, H) = EP + (dirToVec(H) * S) .
 
   eq isCollision(P1, P2) = distSq(P1, P2) < 1/10 .
