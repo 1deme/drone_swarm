@@ -4,7 +4,7 @@ omod DRONE-INSTANCE is
   protecting DRONE-BRAIN .
 
   subsort Vector < Position .
-  subsort Dir8 < Heading .
+  subsort Dir8 < Dir .
 
   op wind : Vector -> Disturbance [ctor] .
   op d : Nat -> Oid [ctor] .

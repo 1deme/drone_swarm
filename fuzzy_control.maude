@@ -4,7 +4,7 @@ omod FUZZY-SPEED-CONTROL is
   protecting BOOL .
 
   subsort Vector < Position .
-  subsort Dir8 < Heading .
+  subsort Dir8 < Dir .
 
   vars O : Oid .
   vars P DP MyEP DangerEP : Vector .
