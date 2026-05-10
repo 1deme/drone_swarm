@@ -40,10 +40,10 @@ omod GENERAL-FRAMEWORK is
 
   op perceiveEnvironment : Configuration -> Configuration .
   eq perceiveEnvironment(none) = none .
-  eq perceiveEnvironment(< ID : Agent | pos : P, estPos : EP, belief : B, AS > C) = 
+  eq perceiveEnvironment(< ID : Agent | pos : P, estPos : EP, belief : B > C) = 
      (if hasReliablePerception(P) 
-      then < ID : Agent | pos : P, estPos : P, belief : 1/1, AS >
-      else < ID : Agent | pos : P, estPos : EP, belief : B, AS > fi) 
+      then < ID : Agent | pos : P, estPos : P, belief : 1/1 >
+      else < ID : Agent | pos : P, estPos : EP, belief : B > fi) 
      perceiveEnvironment(C) .
 
   op broadcastAll : Configuration -> Configuration .
