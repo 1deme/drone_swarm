@@ -20,14 +20,14 @@ omod GENERAL-FRAMEWORK is
   sort System .
   op { _|_ } : Configuration Nat -> System [ctor] .
 
-  vars C C' : Configuration . 
+  vars C C' Acc : Configuration . 
   var O : Object .
   vars P EP P' : Position .
   vars B S : Rat .
   var H : Dir .
   var AS AS' : AttributeSet .
   vars ID ID1 : Oid .
-  var T : Nat .
+  var T N : Nat .
   var D : Disturbance .
   var DS : DisturbanceSet .
 
@@ -61,13 +61,27 @@ omod GENERAL-FRAMEWORK is
          estPos : estimateNextPosition(EP, S, H) >) 
      applyPhysics(C, D) .
 
+  op applyPhysicsAcc : Configuration Configuration Disturbance -> Configuration .
+  eq applyPhysicsAcc(none, Acc, D) = Acc .
+  eq applyPhysicsAcc((< ID : Agent | pos : P, estPos : EP, speed : S, heading : H > C), Acc, D) =
+     applyPhysicsAcc(
+        C, 
+        Acc (< ID : Agent | 
+         pos : updatePhysicalState(P, S, H, D),
+         estPos : estimateNextPosition(EP, S, H) >),
+        D
+      ) .
+
+  op applyPhysics : Configuration Disturbance -> Configuration .
+  eq applyPhysics(C, D) = applyPhysicsAcc(C, none, D) .
+
   op performStep : Configuration Disturbance -> Configuration .
   eq performStep(C, D) = broadcastAll(applyPhysics(thinkAll(perceiveEnvironment(C)), D)) .
 
   op objectiveAccomplished : System -> Bool .
 
-  crl [performBigStep] : { C | T } => { performStep(C, D) | T + 1 } 
-      if objectiveAccomplished({ C | T }) /\ D ; DS := possibleDisturbances .
+  crl [performBigStep] : { C | N } => { performStep(C, D) | N + 1 } 
+      if objectiveAccomplished({ C | N }) /\ D ; DS := possibleDisturbances .
 
   op isHit : Object Configuration -> Bool .
   ceq isHit(< ID : Agent | pos : P, AS > , < ID1 : Agent | pos : P' , AS' > C) = true 
@@ -78,6 +92,6 @@ omod GENERAL-FRAMEWORK is
   eq solve(none, C') = none .
   eq solve(O C, C') = (if isHit(O, C') then none else O fi) solve(C, C') .
 
-  ceq { O C | T } = { solve(O C, O C) | T } if isHit(O, C) .
+  ceq { O C | N } = { solve(O C, O C) | N } if isHit(O, C) .
 
 endom
