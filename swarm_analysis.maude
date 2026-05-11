@@ -39,7 +39,5 @@ mod SWARM-ANALYSIS is
   eq meanEpistemicSuccess({ C | T }, N) = sumEpistemicSuccess(C) / N .
 
   --- 3. Simulation Control
-  eq continueSimulation({ C | T }) = 
-     if T >= 100 then false 
-     else objectiveAccomplished({ C | T }, 3) < 9/10 fi .
+  eq continueSimulation({ C | T }) = objectiveAccomplished({ C | T }, 3) < 9/10 .
 endm
