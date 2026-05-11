@@ -8,4 +8,4 @@ search [1, 100] in SWARM-ANALYSIS :
                      belief : 1/1, speed : 1/1, heading : NE, inbox : emptyMsg >
   | 0 } 
   =>* { C | T } 
-  such that T >= 100 and objectiveAccomplished({ C | T }, 3) < 9/10 .
+  such that T >= 100 and swarmSuccess({ C | T }, 3) < 9/10 .

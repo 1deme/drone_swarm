@@ -64,10 +64,10 @@ omod GENERAL-FRAMEWORK is
   op performStep : Configuration Disturbance -> Configuration .
   eq performStep(C, D) = broadcastAll(applyPhysics(thinkAll(perceiveEnvironment(C)), D)) .
 
-  op continueSimulation : System -> Bool .
+  op objectiveAccomplished : System -> Bool .
 
   crl [performBigStep] : { C | T } => { performStep(C, D) | T + 1 } 
-      if continueSimulation({ C | T }) /\ D ; DS := possibleDisturbances .
+      if objectiveAccomplished({ C | T }) /\ D ; DS := possibleDisturbances .
 
   op isHit : Object Configuration -> Bool .
   ceq isHit(< ID : Agent | pos : P, AS > , < ID1 : Agent | pos : P' , AS' > C) = true 

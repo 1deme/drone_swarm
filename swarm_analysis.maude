@@ -24,8 +24,8 @@ mod SWARM-ANALYSIS is
   eq sumSwarmSuccess(< OID : Agent | pos : P, goalPos : G, AS > C) = 
      (1 - (sqEuclideanDist(P, G) / MAX-SQ-DIST)) + sumSwarmSuccess(C) .
 
-  op objectiveAccomplished : System Nat -> Rat .
-  eq objectiveAccomplished({ C | T }, N) = sumSwarmSuccess(C) / N .
+  op swarmSuccess : System Nat -> Rat .
+  eq swarmSuccess({ C | T }, N) = sumSwarmSuccess(C) / N .
 
   --- 2. Epistemic Success (Consolidated)
   op sumEpistemicSuccess : Configuration -> Rat .
@@ -39,5 +39,5 @@ mod SWARM-ANALYSIS is
   eq meanEpistemicSuccess({ C | T }, N) = sumEpistemicSuccess(C) / N .
 
   --- 3. Simulation Control
-  eq continueSimulation({ C | T }) = objectiveAccomplished({ C | T }, 3) < 9/10 .
+  eq objectiveAccomplished({ C | T }) = swarmSuccess({ C | T }, 3) < 9/10 .
 endm
