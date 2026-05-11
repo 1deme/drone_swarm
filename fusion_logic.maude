@@ -20,17 +20,17 @@ omod FUSION-LOGIC is
   eq sumWeights(emptyMsg) = 0/1 .
   eq sumWeights(msg(O, V, B) ; MS) = B + sumWeights(MS) .
 
-  op sumWPos : AgentMsgSet -> Vector .
+  op sumWPos : AgentMsgSet -> Position .
   eq sumWPos(emptyMsg) = v(0/1, 0/1) .
   eq sumWPos(msg(O, V, B) ; MS) = (V * B) + sumWPos(MS) .
 
-  op calcEstPos : Object -> Vector .
-  ceq calcEstPos(< O : Agent | estPos : V, inbox : MS >) = 
+  op calcEstPos : Position AgentMsgSet -> Position .
+  ceq calcEstPos(V, MS) = 
     (if (W >= trustThreshold) then (sumWPos(MS) / W) else V fi)
     if W := sumWeights(MS) .
 
-  op calcBelief : Object -> Rat .
-  ceq calcBelief(< O : Agent | belief : B, inbox : MS >) = 
+  op calcBelief : Rat AgentMsgSet -> Rat .
+  ceq calcBelief(B, MS) = 
     (if (W >= trustThreshold) 
      then (if (B + (consensusBonus * W) > 1/1) then 1/1 else (B + (consensusBonus * W)) fi) 
      else (if B > 1/50 then B - 1/50 else 0 fi) fi)

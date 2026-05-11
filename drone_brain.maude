@@ -24,12 +24,12 @@ mod DRONE-BRAIN is
                     estPos : NEW-EP,
                     goalPos : G,
                     belief : NEW-B,
-                    speed : calcSpeed(< O : Agent | estPos : NEW-EP, heading : NEW-H, belief : NEW-B, inbox : MS >), 
+                    speed : calcSpeed(NEW-EP, NEW-H, NEW-B, MS), 
                     heading : NEW-H,
                     inbox : emptyMsg >
       if < O : Agent | pos : P, estPos : EP, goalPos : G, belief : B, speed : S, heading : H, inbox : MS > := D
-      /\ NEW-EP := calcEstPos(D)
-      /\ NEW-B  := calcBelief(D)
+      /\ NEW-EP := calcEstPos(EP, MS)
+      /\ NEW-B  := calcBelief(B, MS)
       /\ NEW-H  := bestDir(NEW-EP, G) .
       
   op betterDir : Vector Vector Dir8 Dir8 -> Dir8 .
