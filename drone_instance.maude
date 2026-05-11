@@ -3,16 +3,16 @@ omod DRONE-INSTANCE is
   protecting GEOMETRY . 
   protecting DRONE-BRAIN .
 
-  subsort Vector < Position .
+  subsort loc < Position .
   subsort Dir8 < Dir .
 
-  op wind : Vector -> Disturbance [ctor] .
+  op wind : loc -> Disturbance [ctor] .
   op d : Nat -> Oid [ctor] .
 
-  vars P P1 P2 EP : Vector .
+  vars P P1 P2 EP : loc .
   vars S B : Rat .
   vars H : Dir8 .
-  vars W : Vector .
+  vars W : loc .
 
   eq hasReliablePerception(P) = distSq(P, v(15, 15)) <= 64 .
 

@@ -3,10 +3,10 @@ omod FUSION-LOGIC is
   protecting GEOMETRY .
   protecting RAT .
 
-  subsort Vector < Position .
+  subsort loc < Position .
 
   vars O : Oid .
-  vars V : Vector .
+  vars V : loc .
   vars B W : Rat .
   var MS : AgentMsgSet .
 

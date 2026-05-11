@@ -2,7 +2,7 @@ mod SWARM-ANALYSIS is
   protecting DRONE-INSTANCE .
 
   vars C : Configuration .
-  vars P G EP : Vector .
+  vars P G EP : loc .
   vars N T : Nat .
   var OID : Oid .
   var AS : AttributeSet .
@@ -14,7 +14,7 @@ mod SWARM-ANALYSIS is
   op TRUST-THRESHOLD-SQ : -> Rat .
   eq TRUST-THRESHOLD-SQ = 25 .
 
-  op sqEuclideanDist : Vector Vector -> Rat .
+  op sqEuclideanDist : loc loc -> Rat .
   eq sqEuclideanDist(v(X1, Y1), v(X2, Y2)) = 
      ((X1 - X2) * (X1 - X2)) + ((Y1 - Y2) * (Y1 - Y2)) .
 

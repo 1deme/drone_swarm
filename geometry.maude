@@ -1,13 +1,13 @@
 fmod GEOMETRY is
   protecting RAT .
   
-  sorts Vector .
-  op v : Rat Rat -> Vector [ctor] .
+  sorts loc .
+  op v : Rat Rat -> loc [ctor] .
 
   sort Dir8 .
   ops N NE E SE S SW W NW stop : -> Dir8 [ctor] .
 
-  op dirToVec : Dir8 -> Vector .
+  op dirToVec : Dir8 -> loc .
   eq dirToVec(N)    = v(0, 1) .
   eq dirToVec(E)    = v(1, 0) .
   eq dirToVec(S)    = v(0, -1) .
@@ -20,19 +20,19 @@ fmod GEOMETRY is
 
   vars X Y X1 Y1 X2 Y2 R  : Rat .
 
-  op _+_ : Vector Vector -> Vector .
+  op _+_ : loc loc -> loc .
   eq v(X1, Y1) + v(X2, Y2) = v(X1 + X2, Y1 + Y2) .
 
-  op _-_ : Vector Vector -> Vector .
+  op _-_ : loc loc -> loc .
   eq v(X1, Y1) - v(X2, Y2) = v(X1 - X2, Y1 - Y2) .
 
-  op _*_ : Vector Rat -> Vector .
+  op _*_ : loc Rat -> loc .
   eq v(X, Y) * R = v(X * R, Y * R) .
 
-  op _/_ : Vector Rat -> Vector .
+  op _/_ : loc Rat -> loc .
   eq v(X, Y) / R = v(X / R, Y / R) .
 
-  op distSq : Vector Vector -> Rat .
+  op distSq : loc loc -> Rat .
   eq distSq(v(X1, Y1), v(X2, Y2)) = ((X1 - X2) * (X1 - X2)) + ((Y1 - Y2) * (Y1 - Y2)) .
 
 endfm

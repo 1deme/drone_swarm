@@ -3,11 +3,11 @@ omod FUZZY-SPEED-CONTROL is
   protecting GEOMETRY .
   protecting BOOL .
 
-  subsort Vector < Position .
+  subsort loc < Position .
   subsort Dir8 < Dir .
 
   vars O : Oid .
-  vars P DP MyEP DangerEP : Vector .
+  vars P DP MyEP DangerEP : loc .
   vars B MyB DangerB S1 S2 W Strength : Rat .
   var MS : AgentMsgSet .
   var M : AgentMsg .
@@ -30,7 +30,7 @@ omod FUZZY-SPEED-CONTROL is
   op muConfident : Rat -> Rat .
   eq muConfident(B) = if B <= 1/2 then 0/1 else (if B >= 3/4 then 1/1 else (B - 1/2) * 4/1 fi) fi .
 
-  op isClosing : Position Dir8 Vector -> Bool .
+  op isClosing : Position Dir8 loc -> Bool .
   eq isClosing(P, H, DP) = distSq(P + dirToVec(H), DP) < distSq(P, DP) .
 
   op goalEmergency : -> Rat . eq goalEmergency = 1/20 .
