@@ -6,6 +6,6 @@ search [1, 100] in SWARM-ANALYSIS :
                      belief : 1/1, speed : 1/1, heading : NE, inbox : emptyMsg >
     < d(3) : Agent | pos : v(1, 1), estPos : v(0, 1), goalPos : v(20, 20), 
                      belief : 1/1, speed : 1/1, heading : NE, inbox : emptyMsg >
-  | 0 } 
-  =>* { C | T } 
-  such that T >= 100 and swarmSuccess({ C | T }, 3) < 9/10 .
+  | 0, 1 } 
+  =>* { C | N, DT } 
+  such that N >= 100 and swarmSuccess(C, 3) < 9/10 .

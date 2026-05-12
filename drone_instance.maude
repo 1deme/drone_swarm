@@ -13,15 +13,15 @@ omod DRONE-INSTANCE is
   vars S B : Rat .
   vars H : Dir8 .
   vars W : loc .
+  var  DT : Rat .
 
   eq hasReliablePerception(P) = distSq(P, v(15, 15)) <= 64 .
 
   eq inCommunicationRange(P1, P2) = distSq(P1, P2) <= 25 .
 
-  eq updatePhysicalState(P, S, H, wind(W)) = (P + (dirToVec(H) * S)) + W .
+  eq updatePhysicalState(P, S, H, wind(W), DT) = P + ((dirToVec(H) * (S * DT)) + (W * DT)) .
 
-  eq estimateNextPosition(EP, S, H) = EP + (dirToVec(H) * S) .
-
+  eq estimateNextPosition(EP, S, H, DT) = EP + (dirToVec(H) * (S * DT)) .
   eq isCollision(P1, P2) = distSq(P1, P2) < 1/10 .
 
   eq possibleDisturbances = wind(v(0, 1/10)) ; wind(v(1/10, 0)) ; wind(v(-1/10, 0)) .

@@ -18,12 +18,12 @@ omod GENERAL-FRAMEWORK is
                 belief : Rat, speed : Rat, heading : Dir, inbox : AgentMsgSet .
 
   sort System .
-  op { _|_ } : Configuration Nat -> System [ctor] .
+  op { _ | _, _ } : Configuration Nat Rat -> System [ctor] .
 
   vars C C' Acc : Configuration . 
   var O : Object .
   vars P EP P' : Position .
-  vars B S : Rat .
+  vars B S DT : Rat .
   var H : Dir .
   var AS AS' : AttributeSet .
   vars ID ID1 : Oid .
@@ -33,8 +33,8 @@ omod GENERAL-FRAMEWORK is
 
   op hasReliablePerception : Position -> Bool .
   op inCommunicationRange : Position Position -> Bool .
-  op updatePhysicalState : Position Rat Dir Disturbance -> Position .
-  op estimateNextPosition : Position Rat Dir -> Position .
+  op updatePhysicalState : Position Rat Dir Disturbance Rat -> Position .
+  op estimateNextPosition : Position Rat Dir Rat -> Position .
   op isCollision : Position Position -> Bool .
   op possibleDisturbances : -> DisturbanceSet .
 
@@ -53,35 +53,30 @@ omod GENERAL-FRAMEWORK is
   eq thinkAll(none) = none .
   eq thinkAll(O C) = think(O) thinkAll(C) .
 
-  op applyPhysics : Configuration Disturbance -> Configuration .
-  eq applyPhysics(none, D) = none .
-  eq applyPhysics((< ID : Agent | pos : P, estPos : EP, speed : S, heading : H > C), D) =
-     (< ID : Agent | 
-         pos : updatePhysicalState(P, S, H, D),
-         estPos : estimateNextPosition(EP, S, H) >) 
-     applyPhysics(C, D) .
-
-  op applyPhysicsAcc : Configuration Configuration Disturbance -> Configuration .
-  eq applyPhysicsAcc(none, Acc, D) = Acc .
-  eq applyPhysicsAcc((< ID : Agent | pos : P, estPos : EP, speed : S, heading : H > C), Acc, D) =
+  op applyPhysicsAcc : Configuration Configuration Disturbance Rat -> Configuration .
+  
+  eq applyPhysicsAcc(none, Acc, D, DT) = Acc .
+  
+  eq applyPhysicsAcc((< ID : Agent | pos : P, estPos : EP, speed : S, heading : H > C), Acc, D, DT) =
      applyPhysicsAcc(
         C, 
         Acc (< ID : Agent | 
-         pos : updatePhysicalState(P, S, H, D),
-         estPos : estimateNextPosition(EP, S, H) >),
-        D
+                pos : updatePhysicalState(P, S, H, D, DT),
+                estPos : estimateNextPosition(EP, S, H, DT) >),
+        D, 
+        DT
       ) .
 
-  op applyPhysics : Configuration Disturbance -> Configuration .
-  eq applyPhysics(C, D) = applyPhysicsAcc(C, none, D) .
+  op applyPhysics : Configuration Disturbance Rat -> Configuration .
+  eq applyPhysics(C, D, DT) = applyPhysicsAcc(C, none, D, DT) .
 
-  op performStep : Configuration Disturbance -> Configuration .
-  eq performStep(C, D) = broadcastAll(applyPhysics(thinkAll(perceiveEnvironment(C)), D)) .
+  op performStep : Configuration Disturbance Rat -> Configuration .
+  eq performStep(C, D, DT) = broadcastAll(applyPhysics(thinkAll(perceiveEnvironment(C)), D, DT)) .
 
-  op objectiveAccomplished : System -> Bool .
+  op objectiveAccomplished : Configuration -> Bool .
 
-  crl [performBigStep] : { C | N } => { performStep(C, D) | N + 1 } 
-      if objectiveAccomplished({ C | N }) /\ D ; DS := possibleDisturbances .
+  crl [performBigStep] : { C | N, DT } => { performStep(C, D, DT) | N + 1, DT } 
+      if objectiveAccomplished(C) /\ D ; DS := possibleDisturbances .
 
   op isHit : Object Configuration -> Bool .
   ceq isHit(< ID : Agent | pos : P, AS > , < ID1 : Agent | pos : P' , AS' > C) = true 
@@ -92,6 +87,6 @@ omod GENERAL-FRAMEWORK is
   eq solve(none, C') = none .
   eq solve(O C, C') = (if isHit(O, C') then none else O fi) solve(C, C') .
 
-  ceq { O C | N } = { solve(O C, O C) | N } if isHit(O, C) .
+  ceq { O C | N, DT } = { solve(O C, O C) | N, DT } if isHit(O, C) .
 
 endom
