@@ -21,7 +21,7 @@ omod FUSION-LOGIC is
   eq sumWeights(msg(O, V, B) ; MS) = B + sumWeights(MS) .
 
   op sumWPos : AgentMsgSet -> Position .
-  eq sumWPos(emptyMsg) = v(0/1, 0/1) .
+  eq sumWPos(emptyMsg) = v(0, 0, 0) .
   eq sumWPos(msg(O, V, B) ; MS) = (V * B) + sumWPos(MS) .
 
   op calcEstPos : Position AgentMsgSet -> Position .

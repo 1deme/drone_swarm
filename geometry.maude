@@ -2,37 +2,79 @@ fmod GEOMETRY is
   protecting RAT .
   
   sorts loc .
-  op v : Rat Rat -> loc [ctor] .
 
-  sort Dir8 .
-  ops N NE E SE S SW W NW stop : -> Dir8 [ctor] .
+  op v : Rat Rat Rat -> loc [ctor] .
 
-  op dirToVec : Dir8 -> loc .
-  eq dirToVec(N)    = v(0, 1) .
-  eq dirToVec(E)    = v(1, 0) .
-  eq dirToVec(S)    = v(0, -1) .
-  eq dirToVec(W)    = v(-1, 0) .
-  eq dirToVec(NE)   = v(7/10, 7/10) .
-  eq dirToVec(SE)   = v(7/10, -7/10) .
-  eq dirToVec(SW)   = v(-7/10, -7/10) .
-  eq dirToVec(NW)   = v(-7/10, 7/10) .
-  eq dirToVec(stop) = v(0, 0) .
+  sort Dir Dir3D .
+  subsort Dir3D < Dir .
 
-  vars X Y X1 Y1 X2 Y2 R  : Rat .
+  ops N NE E SE S SW W NW 
+      U D 
+      NU NEU EU SEU SU SWU WU NWU
+      ND NED ED SED SD SWD WD NWD 
+      stop : -> Dir3D [ctor] .
+
+  op dirToVec : Dir3D -> loc .
+
+  eq dirToVec(N)    = v(0, 1, 0) .
+  eq dirToVec(E)    = v(1, 0, 0) .
+  eq dirToVec(S)    = v(0, -1, 0) .
+  eq dirToVec(W)    = v(-1, 0, 0) .
+  eq dirToVec(NE)   = v(7/10, 7/10, 0) .
+  eq dirToVec(SE)   = v(7/10, -7/10, 0) .
+  eq dirToVec(SW)   = v(-7/10, -7/10, 0) .
+  eq dirToVec(NW)   = v(-7/10, 7/10, 0) .
+  
+  eq dirToVec(U)    = v(0, 0, 1) .
+  eq dirToVec(D)    = v(0, 0, -1) .
+
+  eq dirToVec(NU)   = v(0, 7/10, 7/10) .
+  eq dirToVec(EU)   = v(7/10, 0, 7/10) .
+  eq dirToVec(SU)   = v(0, -7/10, 7/10) .
+  eq dirToVec(WU)   = v(-7/10, 0, 7/10) .
+  eq dirToVec(ND)   = v(0, 7/10, -7/10) .
+  eq dirToVec(ED)   = v(7/10, 0, -7/10) .
+  eq dirToVec(SD)   = v(0, -7/10, -7/10) .
+  eq dirToVec(WD)   = v(-7/10, 0, -7/10) .
+
+  eq dirToVec(NEU)  = v(6/10, 6/10, 6/10) .
+  eq dirToVec(SEU)  = v(6/10, -6/10, 6/10) .
+  eq dirToVec(SWU)  = v(-6/10, -6/10, 6/10) .
+  eq dirToVec(NWU)  = v(-6/10, 6/10, 6/10) .
+  eq dirToVec(NED)  = v(6/10, 6/10, -6/10) .
+  eq dirToVec(SED)  = v(6/10, -6/10, -6/10) .
+  eq dirToVec(SWD)  = v(-6/10, -6/10, -6/10) .
+  eq dirToVec(NWD)  = v(-6/10, 6/10, -6/10) .
+
+  eq dirToVec(stop) = v(0, 0, 0) .
+
+  vars X Y Z X1 Y1 Z1 X2 Y2 Z2 R : Rat .
 
   op _+_ : loc loc -> loc .
-  eq v(X1, Y1) + v(X2, Y2) = v(X1 + X2, Y1 + Y2) .
+  eq v(X1, Y1, Z1) + v(X2, Y2, Z2) = v(X1 + X2, Y1 + Y2, Z1 + Z2) .
 
   op _-_ : loc loc -> loc .
-  eq v(X1, Y1) - v(X2, Y2) = v(X1 - X2, Y1 - Y2) .
+  eq v(X1, Y1, Z1) - v(X2, Y2, Z2) = v(X1 - X2, Y1 - Y2, Z1 - Z2) .
 
   op _*_ : loc Rat -> loc .
-  eq v(X, Y) * R = v(X * R, Y * R) .
+  eq v(X, Y, Z) * R = v(X * R, Y * R, Z * R) .
 
   op _/_ : loc Rat -> loc .
-  eq v(X, Y) / R = v(X / R, Y / R) .
+  eq v(X, Y, Z) / R = v(X / R, Y / R, Z / R) .
 
   op distSq : loc loc -> Rat .
-  eq distSq(v(X1, Y1), v(X2, Y2)) = ((X1 - X2) * (X1 - X2)) + ((Y1 - Y2) * (Y1 - Y2)) .
+  eq distSq(v(X1, Y1, Z1), v(X2, Y2, Z2)) = 
+    ((X1 - X2) * (X1 - X2)) + 
+    ((Y1 - Y2) * (Y1 - Y2)) + 
+    ((Z1 - Z2) * (Z1 - Z2)) .
+
+  sort Dir3DList .
+  op nil : -> Dir3DList [ctor] .
+  op _::_ : Dir3D Dir3DList -> Dir3DList [ctor] .
+
+  op allDirs : -> Dir3DList .
+  eq allDirs = N :: NE :: E :: SE :: S :: SW :: W :: NW :: 
+               U :: D :: NU :: NEU :: EU :: SEU :: SU :: SWU :: WU :: NWU :: 
+               ND :: NED :: ED :: SED :: SD :: SWD :: WD :: NWD :: stop :: nil .
 
 endfm

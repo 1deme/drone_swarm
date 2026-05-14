@@ -1,11 +1,19 @@
-search [1, 100] in SWARM-ANALYSIS : 
+search [1, 3] in SWARM-ANALYSIS : 
   {
-    < d(1) : Agent | pos : v(0, 0), estPos : v(0, 0), goalPos : v(20, 20), 
-                     belief : 1/1, speed : 1/1, heading : NE, inbox : emptyMsg >
-    < d(2) : Agent | pos : v(0, 0), estPos : v(1, 0), goalPos : v(20, 20), 
-                     belief : 1/1, speed : 1/1, heading : NE, inbox : emptyMsg >
-    < d(3) : Agent | pos : v(1, 1), estPos : v(0, 1), goalPos : v(20, 20), 
-                     belief : 1/1, speed : 1/1, heading : NE, inbox : emptyMsg >
+    < d(1) : Agent | pos : v(0, 0, 0), 
+                     estPos : v(0, 0, 0), 
+                     goalPos : v(40, 0, 0), 
+                     belief : 1/1, 
+                     speed : 1/1, 
+                     heading : E, 
+                     inbox : emptyMsg >
+    < d(2) : Agent | pos : v(5, 5, 5), 
+                     estPos : v(5, 5, 5), 
+                     goalPos : v(30, 30, 30), 
+                     belief : 1/1, 
+                     speed : 1/1, 
+                     heading : E, 
+                     inbox : emptyMsg >
   | 0, 1 } 
   =>* { C | N, DT } 
-  such that N >= 100 and swarmSuccess(C, 3) < 9/10 .
+  such that N >= 3 and objectiveAccomplished(C) .

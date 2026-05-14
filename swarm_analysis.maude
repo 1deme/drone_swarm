@@ -6,35 +6,36 @@ mod SWARM-ANALYSIS is
   var N : Nat .
   var OID : Oid .
   var AS : AttributeSet .
-  vars X1 Y1 X2 Y2 DT : Rat .
+  vars X1 Y1 Z1 X2 Y2 Z2 DT : Rat .
 
-  op MAX-SQ-DIST : -> Rat .
-  eq MAX-SQ-DIST = 3200 .
+  op MAaxSqDist : -> Rat .
+  eq MAaxSqDist = 2700/1 .
 
-  op TRUST-THRESHOLD-SQ : -> Rat .
-  eq TRUST-THRESHOLD-SQ = 25 .
+  op TrustThreasholdSq : -> Rat .
+  eq TrustThreasholdSq = 25/1 .
 
   op sqEuclideanDist : loc loc -> Rat .
-  eq sqEuclideanDist(v(X1, Y1), v(X2, Y2)) = 
-     ((X1 - X2) * (X1 - X2)) + ((Y1 - Y2) * (Y1 - Y2)) .
+  eq sqEuclideanDist(v(X1, Y1, Z1), v(X2, Y2, Z2)) = 
+     ((X1 - X2) * (X1 - X2)) + ((Y1 - Y2) * (Y1 - Y2)) + ((Z1 - Z2) * (Z1 - Z2)) .
 
   op sumSwarmSuccess : Configuration -> Rat .
-  eq sumSwarmSuccess(none) = 0 .
+  eq sumSwarmSuccess(none) = 0/1 .
   eq sumSwarmSuccess(< OID : Agent | pos : P, goalPos : G, AS > C) = 
-     (1 - (sqEuclideanDist(P, G) / MAX-SQ-DIST)) + sumSwarmSuccess(C) .
+     (1/1 - (sqEuclideanDist(P, G) / MAaxSqDist)) + sumSwarmSuccess(C) .
 
   op swarmSuccess : Configuration Nat -> Rat .
   eq swarmSuccess(C, N) = sumSwarmSuccess(C) / N .
 
   op sumEpistemicSuccess : Configuration -> Rat .
-  eq sumEpistemicSuccess(none) = 0 .
+  eq sumEpistemicSuccess(none) = 0/1 .
   eq sumEpistemicSuccess(< OID : Agent | pos : P, estPos : EP, AS > C) = 
-     (if sqEuclideanDist(P, EP) >= TRUST-THRESHOLD-SQ then 0
-      else 1 - (sqEuclideanDist(P, EP) / TRUST-THRESHOLD-SQ) fi) 
+     (if sqEuclideanDist(P, EP) >= TrustThreasholdSq then 0/1
+      else 1/1 - (sqEuclideanDist(P, EP) / TrustThreasholdSq) fi) 
      + sumEpistemicSuccess(C) .
 
   op meanEpistemicSuccess : Configuration Nat -> Rat .
   eq meanEpistemicSuccess(C, N) = sumEpistemicSuccess(C) / N .
 
-  eq objectiveAccomplished(C) = swarmSuccess(C, 3) < 9/10 .
+  eq objectiveAccomplished(C) = swarmSuccess(C, 1) >= 9/10 .
+
 endm

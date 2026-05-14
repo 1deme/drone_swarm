@@ -1,8 +1,9 @@
 omod GENERAL-FRAMEWORK is
   protecting NAT .
   protecting RAT .
+  protecting GEOMETRY .
 
-  sorts Position Dir Disturbance DisturbanceSet .
+  sorts Position Disturbance DisturbanceSet .
   subsort Disturbance < DisturbanceSet .
   
   op noneDist : -> DisturbanceSet [ctor] .
@@ -76,7 +77,7 @@ omod GENERAL-FRAMEWORK is
   op objectiveAccomplished : Configuration -> Bool .
 
   crl [performBigStep] : { C | N, DT } => { performStep(C, D, DT) | N + 1, DT } 
-      if objectiveAccomplished(C) /\ D ; DS := possibleDisturbances .
+      if ( not objectiveAccomplished(C) ) /\ D ; DS := possibleDisturbances .
 
   op isHit : Object Configuration -> Bool .
   ceq isHit(< ID : Agent | pos : P, AS > , < ID1 : Agent | pos : P' , AS' > C) = true 

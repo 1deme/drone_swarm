@@ -4,14 +4,13 @@ omod FUZZY-SPEED-CONTROL is
   protecting BOOL .
 
   subsort loc < Position .
-  subsort Dir8 < Dir .
 
   vars O : Oid .
   vars P DP MyEP DangerEP : loc .
   vars B MyB DangerB S1 S2 W Strength : Rat .
   var MS : AgentMsgSet .
   var M : AgentMsg .
-  var H : Dir8 .
+  var H : Dir3D .
   vars W1 W2 W3 W4 W5 D : Rat .
   
   op muNear : Rat -> Rat .
@@ -30,7 +29,7 @@ omod FUZZY-SPEED-CONTROL is
   op muConfident : Rat -> Rat .
   eq muConfident(B) = if B <= 1/2 then 0/1 else (if B >= 3/4 then 1/1 else (B - 1/2) * 4/1 fi) fi .
 
-  op isClosing : Position Dir8 loc -> Bool .
+  op isClosing : Position Dir loc -> Bool .
   eq isClosing(P, H, DP) = distSq(P + dirToVec(H), DP) < distSq(P, DP) .
 
   op goalEmergency : -> Rat . eq goalEmergency = 1/20 .
@@ -39,7 +38,7 @@ omod FUZZY-SPEED-CONTROL is
   op goalWary      : -> Rat . eq goalWary      = 1/2 .
   op goalCruise    : -> Rat . eq goalCruise    = 1/1 .
 
-  op getWeightedSpeed : Position Dir8 Rat AgentMsg -> Rat .
+  op getWeightedSpeed : Position Dir Rat AgentMsg -> Rat .
   ceq getWeightedSpeed(P, H, B, msg(O, DP, DangerB)) = 
     ( (W1 * goalEmergency) + (W2 * goalLost) + (W3 * goalCaution) + (W4 * goalWary) + (W5 * goalCruise) ) / 
     (W1 + W2 + W3 + W4 + W5)
@@ -50,7 +49,7 @@ omod FUZZY-SPEED-CONTROL is
     /\ W4  := muWary(B)
     /\ W5  := muFar(D) * muConfident(B) .
 
-  op evalSpeedSet : Position Dir8 Rat AgentMsgSet -> Rat .
+  op evalSpeedSet : Position Dir Rat AgentMsgSet -> Rat .
   eq evalSpeedSet(P, H, B, emptyMsg) = 
      ( (muLost(B) * 1/2) + (muConfident(B) * 1/1) ) / (muLost(B) + muConfident(B)) .
   

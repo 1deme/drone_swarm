@@ -6,17 +6,11 @@ mod DRONE-BRAIN is
   vars P P2 G EP NEW-EP LEADER-P : loc .
   vars O O2 : Oid .
   vars B B2 S currDist nextDist NEW-B LEADER-B : Rat .
-  vars H H1 H2 NEW-H : Dir8 .
+  vars H H1 H2 NEW-H : Dir .
   var AS : AttributeSet .
   var MS : AgentMsgSet .
   var M BEST-MSG : AgentMsg .
   var D : Object .
-
-  op getBelief : AgentMsg -> Rat .
-  eq getBelief(msg(O, P, B)) = B .
-
-  op getPos : AgentMsg -> loc .
-  eq getPos(msg(O, P, B)) = P .
 
   op think : Object -> Object .
   ceq think(D) =
@@ -32,18 +26,6 @@ mod DRONE-BRAIN is
       /\ NEW-B  := calcBelief(B, MS)
       /\ NEW-H  := bestDir(NEW-EP, G) .
       
-  op betterDir : loc loc Dir8 Dir8 -> Dir8 .
-  eq betterDir(P, G, H1, H2) =
-    if distSq(P + dirToVec(H1), G) < distSq(P + dirToVec(H2), G)
-    then H1 else H2 fi .
-
-  op bestDir : loc loc -> Dir8 .
-  eq bestDir(P, G) =
-    betterDir(P, G,
-      betterDir(P, G,
-        betterDir(P, G, N, NE),
-        betterDir(P, G, E, SE)),
-      betterDir(P, G,
-        betterDir(P, G, S, SW),
-        betterDir(P, G, W, NW))) .
+  op bestDir : loc loc -> Dir .
+  
 endm

@@ -4,26 +4,45 @@ omod DRONE-INSTANCE is
   protecting DRONE-BRAIN .
 
   subsort loc < Position .
-  subsort Dir8 < Dir .
 
   op wind : loc -> Disturbance [ctor] .
   op d : Nat -> Oid [ctor] .
 
   vars P P1 P2 EP : loc .
   vars S B : Rat .
-  vars H : Dir8 .
-  vars W : loc .
+  vars H H1 H2 : Dir3D .
+  vars W G : loc .
   var  DT : Rat .
+  var L : Dir3DList .
 
-  eq hasReliablePerception(P) = distSq(P, v(15, 15)) <= 64 .
+  eq hasReliablePerception(P) = distSq(P, v(15, 15, 15)) <= 64 .
 
   eq inCommunicationRange(P1, P2) = distSq(P1, P2) <= 25 .
 
   eq updatePhysicalState(P, S, H, wind(W), DT) = P + ((dirToVec(H) * (S * DT)) + (W * DT)) .
 
   eq estimateNextPosition(EP, S, H, DT) = EP + (dirToVec(H) * (S * DT)) .
+
   eq isCollision(P1, P2) = distSq(P1, P2) < 1/10 .
 
-  eq possibleDisturbances = wind(v(0, 1/10)) ; wind(v(1/10, 0)) ; wind(v(-1/10, 0)) .
+  eq possibleDisturbances = 
+     wind(v(0, 1/10, 0)) ;    
+     wind(v(1/10, 0, 0)) ; 
+     wind(v(0, 0, 1/10)) ;
+     wind(v(0, 0, -1/10)) .
+
+  op betterDir : loc loc Dir3D Dir3D -> Dir3D .
+  eq betterDir(P, G, H1, H2) =
+    if distSq(P + dirToVec(H1), G) < distSq(P + dirToVec(H2), G)
+    then H1 else H2 fi .
+
+  op bestDir : loc loc -> Dir3D .
+  eq bestDir(P, G) = findBest(P, G, allDirs, stop) .
+
+  op findBest : loc loc Dir3DList Dir3D -> Dir3D .
+  eq findBest(P, G, nil, H1) = H1 .
+  
+  eq findBest(P, G, H2 :: L, H1) = 
+     findBest(P, G, L, betterDir(P, G, H1, H2)) .
 
 endom
