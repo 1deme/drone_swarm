@@ -19,7 +19,7 @@ omod GENERAL-FRAMEWORK is
                 belief : Rat, speed : Rat, heading : Dir, inbox : AgentMsgSet .
 
   sort System .
-  op { _ | _ } : Configuration Nat -> System [ctor] .
+  op { _ } : Configuration -> System [ctor] .
 
   vars C C' Acc : Configuration . 
   var O : Object .
@@ -75,7 +75,7 @@ omod GENERAL-FRAMEWORK is
 
   op objectiveAccomplished : Configuration -> Bool .
 
-  crl [performBigStep] : { C | N } => { performStep(C, D) | N + 1 } 
+  crl [performBigStep] : { C } => { performStep(C, D) } 
       if ( not objectiveAccomplished(C) ) /\ D ; DS := possibleDisturbances .
 
   op isHit : Object Configuration -> Bool .
@@ -87,6 +87,6 @@ omod GENERAL-FRAMEWORK is
   eq solve(none, C') = none .
   eq solve(O C, C') = (if isHit(O, C') then none else O fi) solve(C, C') .
 
-  ceq { O C | N } = { solve(O C, O C) | N } if isHit(O, C) .
+  ceq { O C } = { solve(O C, O C) } if isHit(O, C) .
 
 endom
