@@ -9,3 +9,4 @@ load fusion_logic.maude
 load drone_instance.maude
 
 load swarm_analysis.maude
+load meta-tracker.maude

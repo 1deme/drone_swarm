@@ -1,11 +1,19 @@
-search [1, 30] in SWARM-ANALYSIS : 
-  {
-    < d(1) : Agent | pos : v(0, 0, 0), 
-                     estPos : v(0, 0, 0), 
-                     goalPos : v(30, 30, 30), 
-                     belief : 1/1, 
-                     speed : 1/1, 
-                     heading : E, 
-                     inbox : emptyMsg > } 
-  =>* { C } 
-  such that objectiveAccomplished(C) .
+search [1, 30] in SWARM-META-ANALYSIS : 
+  [ {
+      < d(1) : Agent | pos : v(0, 0, 0), 
+                       estPos : v(0, 0, 0), 
+                       goalPos : v(40, 0, 0), 
+                       belief : 1/1, 
+                       speed : 1/1, 
+                       heading : E, 
+                       inbox : emptyMsg >
+      < d(2) : Agent | pos : v(5, 5, 5), 
+                       estPos : v(5, 5, 5), 
+                       goalPos : v(30, 30, 30), 
+                       belief : 1/1, 
+                       speed : 1/1, 
+                       heading : E, 
+                       inbox : emptyMsg >
+    } | 0 ] 
+  =>* [ { C:Configuration } | N:Nat ] 
+  such that N:Nat >= 30 and objectiveAccomplished(C:Configuration) == false .

@@ -1,0 +1,27 @@
+omod SWARM-META-ANALYSIS is
+  protecting META-LEVEL .
+  protecting SWARM-ANALYSIS .
+
+  sort MetaState .
+  op [ _ | _ ] : System Nat -> MetaState [ctor] .
+
+  vars S S' : System .
+  var C : Configuration .
+  var N : Nat .
+  var T' : Term .   
+  var TY : Type .   
+  var SUB : Substitution .   
+
+  --- FIX: Changed the last argument of metaApply to 0. 
+  --- Since performBigStep itself branches via possibleDisturbances, 
+  --- Maude will still naturally find all search branches from match 0.
+  crl [trackedStep] : 
+    [ { C } | N ] => [ S' | N + 1 ]
+    if { T' , TY , SUB } := metaApply(
+                             upModule('SWARM-ANALYSIS, false), 
+                             upTerm({ C }), 
+                             'performBigStep, 
+                             none, 0
+                           )
+    /\ S' := downTerm(T', { none }) .
+endom
