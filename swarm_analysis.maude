@@ -36,6 +36,8 @@ mod SWARM-ANALYSIS is
   op meanEpistemicSuccess : Configuration Nat -> Rat .
   eq meanEpistemicSuccess(C, N) = sumEpistemicSuccess(C) / N .
 
-  eq objectiveAccomplished(C) = swarmSuccess(C, 2) >= 9/10 .
+  op countAgents : Configuration -> Nat .
+  eq countAgents(< OID : Agent | AS > C) = 1 + countAgents(C) .
+  eq countAgents(C) = 0 [owise] .
 
 endm
