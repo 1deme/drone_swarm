@@ -6,14 +6,16 @@ search [1, 30] in SWARM-META-ANALYSIS :
                        belief : 1/1, 
                        speed : 1/1, 
                        heading : E, 
-                       inbox : emptyMsg >
-      < d(2) : Agent | pos : v(5, 5, 5), 
-                       estPos : v(5, 5, 5), 
+                       inbox : none >
+      < d(2) : Agent | pos : v(2, 2, 2), 
+                       estPos : v(2, 2, 2), 
                        goalPos : v(30, 30, 30), 
                        belief : 1/1, 
                        speed : 1/1, 
                        heading : E, 
-                       inbox : emptyMsg >
+                       inbox : none >
     } | 0 ] 
   =>* [ { C:Configuration } | N:Nat ] 
   such that N:Nat >= 30 and objectiveAccomplished(C:Configuration) == false .
+
+

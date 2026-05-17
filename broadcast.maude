@@ -1,27 +1,25 @@
 omod BROADCAST is
   protecting GENERAL-FRAMEWORK .
 
-  vars C-REM C-FIN C-CUR C-FULL : Configuration .
+  vars C-REM C-FIN C-CUR C-FULL MS : Configuration .
   vars S-ID R-ID : Oid .
   vars S-P S-EP R-P : Position .
   vars S-B : Rat .
-  vars MS : AgentMsgSet .
-  vars AS : AttributeSet .
-  var M : AgentMsg .
+  var M : Msg .
 
   eq broadcastAll(C-FULL) = bc-loop(C-FULL, C-FULL) .
 
   op bc-loop : Configuration Configuration -> Configuration .
   eq bc-loop(none, C-CUR) = C-CUR .
   
-  eq bc-loop((< S-ID : Agent | pos : S-P, estPos : S-EP, belief : S-B, AS > C-REM), C-CUR) =
+  eq bc-loop((< S-ID : Agent | pos : S-P, estPos : S-EP, belief : S-B > C-REM), C-CUR) =
      bc-loop(C-REM, deliver(msg(S-ID, S-EP, S-B), S-P, C-CUR, none)) .
 
-  op deliver : AgentMsg Position Configuration Configuration -> Configuration .
+  op deliver : Msg Position Configuration Configuration -> Configuration .
   
   eq deliver(msg(S-ID, S-EP, S-B), S-P, (< R-ID : Agent | pos : R-P, inbox : MS > C-REM), C-FIN) =
      if (S-ID =/= R-ID) and inCommunicationRange(S-P, R-P) then
-        deliver(msg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Agent | inbox : (MS ; msg(S-ID, S-EP, S-B)), pos : R-P > C-FIN))
+        deliver(msg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Agent | inbox : (MS msg(S-ID, S-EP, S-B)), pos : R-P > C-FIN))
      else
         deliver(msg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Agent | pos : R-P, inbox : MS > C-FIN)) fi .
         

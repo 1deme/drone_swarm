@@ -8,7 +8,7 @@ omod FUSION-LOGIC is
   vars O : Oid .
   vars V : loc .
   vars B W : Rat .
-  var MS : AgentMsgSet .
+  var MS : Configuration .
 
   op trustThreshold : -> Rat .
   eq trustThreshold = 1/1 . 
@@ -16,13 +16,13 @@ omod FUSION-LOGIC is
   op consensusBonus : -> Rat .
   eq consensusBonus = 1/50 .
 
-  op sumWeights : AgentMsgSet -> Rat .
-  eq sumWeights(emptyMsg) = 0/1 .
-  eq sumWeights(msg(O, V, B) ; MS) = B + sumWeights(MS) .
+  op sumWeights : Configuration -> Rat .
+  eq sumWeights(none) = 0/1 .
+  eq sumWeights(msg(O, V, B) MS) = B + sumWeights(MS) .
 
-  op sumWPos : AgentMsgSet -> Position .
-  eq sumWPos(emptyMsg) = v(0, 0, 0) .
-  eq sumWPos(msg(O, V, B) ; MS) = (V * B) + sumWPos(MS) .
+  op sumWPos : Configuration -> Position .
+  eq sumWPos(none) = v(0, 0, 0) .
+  eq sumWPos(msg(O, V, B) MS) = (V * B) + sumWPos(MS) .
 
   ceq calcEstPos(V, MS) = 
     (if (W >= trustThreshold) then (sumWPos(MS) / W) else V fi)

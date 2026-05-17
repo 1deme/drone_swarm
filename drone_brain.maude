@@ -7,8 +7,8 @@ mod DRONE-BRAIN is
   vars B B2 S currDist nextDist NEW-B LEADER-B : Rat .
   vars H H1 H2 NEW-H : Dir .
   var AS : AttributeSet .
-  var MS : AgentMsgSet .
-  var M BEST-MSG : AgentMsg .
+  var MS : Configuration .
+  var M BEST-MSG : Msg .
   var D : Object .
 
   op think : Object -> Object .
@@ -19,15 +19,15 @@ mod DRONE-BRAIN is
                     belief : NEW-B,
                     speed : calcSpeed(NEW-EP, NEW-H, NEW-B, MS), 
                     heading : NEW-H,
-                    inbox : emptyMsg >
+                    inbox : none >
       if < O : Agent | pos : P, estPos : EP, goalPos : G, belief : B, speed : S, heading : H, inbox : MS > := D
       /\ NEW-EP := calcEstPos(EP, MS)
       /\ NEW-B  := calcBelief(B, MS)
       /\ NEW-H  := bestDir(NEW-EP, G) .
       
-  op calcBelief : Rat AgentMsgSet -> Rat .
-  op calcEstPos : Position AgentMsgSet -> Position .
-  op calcSpeed : Position Dir Rat AgentMsgSet -> Rat .
+  op calcBelief : Rat Configuration -> Rat .
+  op calcEstPos : Position Configuration -> Position .
+  op calcSpeed : Position Dir Rat Configuration -> Rat .
   op bestDir : Position Position -> Dir .
   
 endm

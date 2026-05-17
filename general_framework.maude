@@ -10,14 +10,10 @@ omod GENERAL-FRAMEWORK is
   op noneDist : -> DisturbanceSet [ctor] .
   op _;_ : DisturbanceSet DisturbanceSet -> DisturbanceSet [assoc comm id: noneDist] .
 
-  sorts AgentMsg AgentMsgSet .
-  subsort AgentMsg < AgentMsgSet .
-  op emptyMsg : -> AgentMsgSet [ctor] .
-  op _;_ : AgentMsgSet AgentMsgSet -> AgentMsgSet [assoc comm id: emptyMsg] .
-  op msg : Oid Position Rat -> AgentMsg [ctor] . 
+  msg msg : Oid Position Rat -> Msg .
 
   class Agent | pos : Position, estPos : Position, goalPos : Position, 
-                belief : Rat, speed : Rat, heading : Dir, inbox : AgentMsgSet .
+                belief : Rat, speed : Rat, heading : Dir, inbox : Configuration .
 
   sort System .
   op { _ } : Configuration -> System [ctor] .

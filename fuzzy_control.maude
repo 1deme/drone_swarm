@@ -9,8 +9,8 @@ omod FUZZY-SPEED-CONTROL is
   vars O : Oid .
   vars P DP MyEP DangerEP : loc .
   vars B MyB DangerB S1 S2 W Strength : Rat .
-  var MS : AgentMsgSet .
-  var M : AgentMsg .
+  var MS : Configuration .
+  var M : Msg .
   var H : Dir3D .
   vars W1 W2 W3 W4 W5 D : Rat .
   
@@ -39,7 +39,7 @@ omod FUZZY-SPEED-CONTROL is
   op goalWary      : -> Rat . eq goalWary      = 1/2 .
   op goalCruise    : -> Rat . eq goalCruise    = 1/1 .
 
-  op getWeightedSpeed : loc Dir3D Rat AgentMsg -> Rat .
+  op getWeightedSpeed : loc Dir3D Rat Msg -> Rat .
   ceq getWeightedSpeed(P, H, B, msg(O, DP, DangerB)) = 
     ( (W1 * goalEmergency) + (W2 * goalLost) + (W3 * goalCaution) + (W4 * goalWary) + (W5 * goalCruise) ) / 
     (W1 + W2 + W3 + W4 + W5)
@@ -50,11 +50,11 @@ omod FUZZY-SPEED-CONTROL is
     /\ W4  := muWary(B)
     /\ W5  := muFar(D) * muConfident(B) .
 
-  op evalSpeedSet : loc Dir3D Rat AgentMsgSet -> Rat .
-  eq evalSpeedSet(P, H, B, emptyMsg) = 
+  op evalSpeedSet : loc Dir3D Rat Configuration -> Rat .
+  eq evalSpeedSet(P, H, B, none) = 
      ( (muLost(B) * 1/2) + (muConfident(B) * 1/1) ) / (muLost(B) + muConfident(B)) .
   
-  ceq evalSpeedSet(P, H, B, M ; MS) = 
+  ceq evalSpeedSet(P, H, B, M MS) = 
     (if S1 < S2 then S1 else S2 fi)
     if S1 := getWeightedSpeed(P, H, B, M)
     /\ S2 := evalSpeedSet(P, H, B, MS) .
