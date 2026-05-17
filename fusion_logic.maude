@@ -1,9 +1,9 @@
 omod FUSION-LOGIC is
-  protecting GENERAL-FRAMEWORK .
   protecting GEOMETRY .
-  protecting RAT .
+  protecting DRONE-BRAIN .
 
   subsort loc < Position .
+  subsort Dir3D < Dir .
 
   vars O : Oid .
   vars V : loc .
@@ -24,12 +24,10 @@ omod FUSION-LOGIC is
   eq sumWPos(emptyMsg) = v(0, 0, 0) .
   eq sumWPos(msg(O, V, B) ; MS) = (V * B) + sumWPos(MS) .
 
-  op calcEstPos : Position AgentMsgSet -> Position .
   ceq calcEstPos(V, MS) = 
     (if (W >= trustThreshold) then (sumWPos(MS) / W) else V fi)
     if W := sumWeights(MS) .
 
-  op calcBelief : Rat AgentMsgSet -> Rat .
   ceq calcBelief(B, MS) = 
     (if (W >= trustThreshold) 
      then (if (B + (consensusBonus * W) > 1/1) then 1/1 else (B + (consensusBonus * W)) fi) 

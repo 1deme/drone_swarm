@@ -1,7 +1,8 @@
 omod DRONE-INSTANCE is
-  protecting GENERAL-FRAMEWORK .
   protecting GEOMETRY . 
   protecting DRONE-BRAIN .
+  protecting FUSION-LOGIC .
+  protecting FUZZY-SPEED-CONTROL .
 
   subsort loc < Position .
 

@@ -1,8 +1,11 @@
-load geometry.maude
 load general_framework.maude
-load fuzzy_control.maude
-load fusion_logic.maude
 load broadcast.maude
 load drone_brain.maude
+
+load geometry.maude
+load fuzzy_control.maude
+load fusion_logic.maude
+
 load drone_instance.maude
+
 load swarm_analysis.maude

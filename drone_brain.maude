@@ -1,9 +1,8 @@
 mod DRONE-BRAIN is
   protecting BROADCAST .
-  protecting FUZZY-SPEED-CONTROL .
-  protecting FUSION-LOGIC .
+  protecting GENERAL-FRAMEWORK .
 
-  vars P P2 G EP NEW-EP LEADER-P : loc .
+  vars P P2 G EP NEW-EP LEADER-P : Position .
   vars O O2 : Oid .
   vars B B2 S currDist nextDist NEW-B LEADER-B : Rat .
   vars H H1 H2 NEW-H : Dir .
@@ -26,6 +25,9 @@ mod DRONE-BRAIN is
       /\ NEW-B  := calcBelief(B, MS)
       /\ NEW-H  := bestDir(NEW-EP, G) .
       
-  op bestDir : loc loc -> Dir .
+  op calcBelief : Rat AgentMsgSet -> Rat .
+  op calcEstPos : Position AgentMsgSet -> Position .
+  op calcSpeed : Position Dir Rat AgentMsgSet -> Rat .
+  op bestDir : Position Position -> Dir .
   
 endm

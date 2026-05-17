@@ -1,12 +1,9 @@
 fmod GEOMETRY is
   protecting RAT .
-  
-  sorts loc .
+
+  sort Dir3D loc .
 
   op v : Rat Rat Rat -> loc [ctor] .
-
-  sort Dir Dir3D .
-  subsort Dir3D < Dir .
 
   ops N NE E SE S SW W NW 
       U D 
