@@ -71,11 +71,11 @@ omod PREDICTIVE-CRASH is
 
   op checkAllPairs : Object Configuration -> CrashEvent .
   eq checkAllPairs(Obj, none) = noCrash .
-  ceq checkAllPairs(< O1 : Agent | pos : P1, speed : S1, heading : H1, AS1 >, 
-                    < O2 : Agent | pos : P2, speed : S2, heading : H2, AS2 > C) =
+  ceq checkAllPairs(< O1 : Drone | pos : P1, speed : S1, heading : H1, AS1 >, 
+                    < O2 : Drone | pos : P2, speed : S2, heading : H2, AS2 > C) =
       minCrash(
         if T <= 1/1 then crashAt(O1, O2, T) else noCrash fi,
-        checkAllPairs(< O1 : Agent | pos : P1, speed : S1, heading : H1, AS1 >, C)
+        checkAllPairs(< O1 : Drone | pos : P1, speed : S1, heading : H1, AS1 >, C)
       )
     if V1 := getVelocity(S1, H1)
     /\ V2 := getVelocity(S2, H2)
@@ -84,7 +84,7 @@ omod PREDICTIVE-CRASH is
 
   --- The Resolver
   op removeDrones : Configuration Oid Oid -> Configuration .
-  eq removeDrones(< O1 : Agent | AS1 > < O2 : Agent | AS2 > C, O1, O2) = C .
+  eq removeDrones(< O1 : Drone | AS1 > < O2 : Drone | AS2 > C, O1, O2) = C .
   eq removeDrones(C, O1, O2) = C [owise] .
 
   op resolveChronological : Configuration -> Configuration .

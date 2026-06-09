@@ -12,7 +12,7 @@ omod GENERAL-FRAMEWORK is
 
   msg msg : Oid Position Rat -> Msg .
 
-  class Agent | pos : Position, estPos : Position, goalPos : Position, 
+  class Drone | pos : Position, estPos : Position, goalPos : Position, 
                 belief : Rat, speed : Rat, heading : Dir, inbox : Configuration .
 
   sort System .
@@ -40,10 +40,10 @@ omod GENERAL-FRAMEWORK is
 
   op perceiveEnvironment : Configuration -> Configuration .
   eq perceiveEnvironment(none) = none .
-  eq perceiveEnvironment(< ID : Agent | pos : P, estPos : EP, belief : B > C) = 
+  eq perceiveEnvironment(< ID : Drone | pos : P, estPos : EP, belief : B > C) = 
      (if hasReliablePerception(P) 
-      then < ID : Agent | pos : P, estPos : P, belief : 1/1 >
-      else < ID : Agent | pos : P, estPos : EP, belief : B > fi) 
+      then < ID : Drone | pos : P, estPos : P, belief : 1/1 >
+      else < ID : Drone | pos : P, estPos : EP, belief : B > fi) 
      perceiveEnvironment(C) .
 
   op broadcastAll : Configuration -> Configuration .
@@ -57,10 +57,10 @@ omod GENERAL-FRAMEWORK is
   
   eq applyPhysicsAcc(none, Acc, D) = Acc .
   
-  eq applyPhysicsAcc((< ID : Agent | pos : P, estPos : EP, speed : S, heading : H > C), Acc, D) =
+  eq applyPhysicsAcc((< ID : Drone | pos : P, estPos : EP, speed : S, heading : H > C), Acc, D) =
      applyPhysicsAcc(
         C, 
-        Acc (< ID : Agent | 
+        Acc (< ID : Drone | 
                 pos : updatePhysicalState(P, S, H, D),
                 estPos : estimateNextPosition(EP, S, H) >),
         D

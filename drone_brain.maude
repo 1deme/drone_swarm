@@ -13,14 +13,14 @@ mod DRONE-BRAIN is
 
   op think : Object -> Object .
   ceq think(D) =
-      < O : Agent | pos : P,
+      < O : Drone | pos : P,
                     estPos : NEW-EP,
                     goalPos : G,
                     belief : NEW-B,
                     speed : calcSpeed(NEW-EP, NEW-H, NEW-B, MS), 
                     heading : NEW-H,
                     inbox : none >
-      if < O : Agent | pos : P, estPos : EP, goalPos : G, belief : B, speed : S, heading : H, inbox : MS > := D
+      if < O : Drone | pos : P, estPos : EP, goalPos : G, belief : B, speed : S, heading : H, inbox : MS > := D
       /\ NEW-EP := calcEstPos(EP, MS)
       /\ NEW-B  := calcBelief(B, MS)
       /\ NEW-H  := bestDir(NEW-EP, G) .

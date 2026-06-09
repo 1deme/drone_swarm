@@ -12,16 +12,16 @@ omod BROADCAST is
   op bc-loop : Configuration Configuration -> Configuration .
   eq bc-loop(none, C-CUR) = C-CUR .
   
-  eq bc-loop((< S-ID : Agent | pos : S-P, estPos : S-EP, belief : S-B > C-REM), C-CUR) =
+  eq bc-loop((< S-ID : Drone | pos : S-P, estPos : S-EP, belief : S-B > C-REM), C-CUR) =
      bc-loop(C-REM, deliver(msg(S-ID, S-EP, S-B), S-P, C-CUR, none)) .
 
   op deliver : Msg Position Configuration Configuration -> Configuration .
   
-  eq deliver(msg(S-ID, S-EP, S-B), S-P, (< R-ID : Agent | pos : R-P, inbox : MS > C-REM), C-FIN) =
+  eq deliver(msg(S-ID, S-EP, S-B), S-P, (< R-ID : Drone | pos : R-P, inbox : MS > C-REM), C-FIN) =
      if (S-ID =/= R-ID) and inCommunicationRange(S-P, R-P) then
-        deliver(msg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Agent | inbox : (MS msg(S-ID, S-EP, S-B)), pos : R-P > C-FIN))
+        deliver(msg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Drone | inbox : (MS msg(S-ID, S-EP, S-B)), pos : R-P > C-FIN))
      else
-        deliver(msg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Agent | pos : R-P, inbox : MS > C-FIN)) fi .
+        deliver(msg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Drone | pos : R-P, inbox : MS > C-FIN)) fi .
         
   eq deliver(M, S-P, none, C-FIN) = C-FIN .
   

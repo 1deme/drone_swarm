@@ -20,7 +20,7 @@ mod SWARM-ANALYSIS is
 
   op sumSwarmSuccess : Configuration -> Rat .
   eq sumSwarmSuccess(none) = 0/1 .
-  eq sumSwarmSuccess(< OID : Agent | pos : P, goalPos : G, AS > C) = 
+  eq sumSwarmSuccess(< OID : Drone | pos : P, goalPos : G, AS > C) = 
      (1/1 - (sqEuclideanDist(P, G) / MAaxSqDist)) + sumSwarmSuccess(C) .
 
   op swarmSuccess : Configuration Nat -> Rat .
@@ -28,7 +28,7 @@ mod SWARM-ANALYSIS is
 
   op sumEpistemicSuccess : Configuration -> Rat .
   eq sumEpistemicSuccess(none) = 0/1 .
-  eq sumEpistemicSuccess(< OID : Agent | pos : P, estPos : EP, AS > C) = 
+  eq sumEpistemicSuccess(< OID : Drone | pos : P, estPos : EP, AS > C) = 
      (if sqEuclideanDist(P, EP) >= TrustThreasholdSq then 0/1
       else 1/1 - (sqEuclideanDist(P, EP) / TrustThreasholdSq) fi) 
      + sumEpistemicSuccess(C) .
@@ -36,8 +36,8 @@ mod SWARM-ANALYSIS is
   op meanEpistemicSuccess : Configuration Nat -> Rat .
   eq meanEpistemicSuccess(C, N) = sumEpistemicSuccess(C) / N .
 
-  op countAgents : Configuration -> Nat .
-  eq countAgents(< OID : Agent | AS > C) = 1 + countAgents(C) .
-  eq countAgents(C) = 0 [owise] .
+  op countDrones : Configuration -> Nat .
+  eq countDrones(< OID : Drone | AS > C) = 1 + countDrones(C) .
+  eq countDrones(C) = 0 [owise] .
 
 endm

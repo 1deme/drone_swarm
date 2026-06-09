@@ -14,7 +14,7 @@ omod SWARM-META-ANALYSIS is
   var SUB : Substitution .   
 
   op initAnalysis : Configuration -> MetaState .
-  eq initAnalysis(C) = [ { C } | 0 , countAgents(C) ] .
+  eq initAnalysis(C) = [ { C } | 0 , countDrones(C) ] .
 
   op metaObjectiveAccomplished : Configuration Nat -> Bool .
   eq metaObjectiveAccomplished(C, IC) = swarmSuccess(C, IC) >= 9/10 .
