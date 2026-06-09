@@ -3,6 +3,7 @@ load broadcast.maude
 load drone_brain.maude
 
 load geometry.maude
+load predictive_crash.maude
 load fuzzy_control.maude
 load fusion_logic.maude
 

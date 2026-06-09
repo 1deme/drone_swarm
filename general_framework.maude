@@ -35,6 +35,7 @@ omod GENERAL-FRAMEWORK is
   op updatePhysicalState : Position Rat Dir Disturbance  -> Position .
   op estimateNextPosition : Position Rat Dir  -> Position .
   op isCollision : Position Position -> Bool .
+  op crashThresholdSq : -> Rat .
   op possibleDisturbances : -> DisturbanceSet .
 
   op perceiveEnvironment : Configuration -> Configuration .
@@ -68,21 +69,22 @@ omod GENERAL-FRAMEWORK is
   op applyPhysics : Configuration Disturbance -> Configuration .
   eq applyPhysics(C, D) = applyPhysicsAcc(C, none, D) .
 
+  op resolveChronological : Configuration -> Configuration .
+
   op performStep : Configuration Disturbance -> Configuration .
-  eq performStep(C, D) = broadcastAll(applyPhysics(thinkAll(perceiveEnvironment(C)), D)) .
+    eq performStep(C, D) = 
+      broadcastAll(
+        applyPhysics(
+          resolveChronological(
+            thinkAll(
+              perceiveEnvironment(C)
+            )
+          ), 
+          D
+        )
+      ) .
 
   crl [performBigStep] : { C } => { performStep(C, D) } 
       if D ; DS := possibleDisturbances .
-
-  op isHit : Object Configuration -> Bool .
-  ceq isHit(< ID : Agent | pos : P, AS > , < ID1 : Agent | pos : P' , AS' > C) = true 
-    if ID =/= ID1 /\ isCollision(P , P') .
-  eq isHit(O, C) = false [owise] .
-
-  op solve : Configuration Configuration -> Configuration .
-  eq solve(none, C') = none .
-  eq solve(O C, C') = (if isHit(O, C') then none else O fi) solve(C, C') .
-
-  ceq { O C } = { solve(O C, O C) } if isHit(O, C) .
 
 endom

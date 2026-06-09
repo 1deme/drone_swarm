@@ -1,5 +1,6 @@
 omod DRONE-INSTANCE is
   protecting GEOMETRY . 
+  protecting PREDICTIVE-CRASH .
   protecting DRONE-BRAIN .
   protecting FUSION-LOGIC .
   protecting FUZZY-SPEED-CONTROL .
@@ -28,6 +29,8 @@ omod DRONE-INSTANCE is
   eq estimateNextPosition(EP, S, H) = EP + (dirToVec(H) * (S * period)) .
 
   eq isCollision(P1, P2) = distSq(P1, P2) < 1/10 .
+
+  eq crashThresholdSq = 1/10 .
 
   eq possibleDisturbances = 
      wind(v(0, 1/10, 0)) ;    
