@@ -9,6 +9,7 @@ omod FUSION-LOGIC is
   vars V : loc .
   vars B W : Rat .
   var MS : Configuration .
+  var EP : Position .
 
   op trustThreshold : -> Rat .
   eq trustThreshold = 1/1 . 
@@ -24,14 +25,21 @@ omod FUSION-LOGIC is
   eq sumWPos(none) = v(0, 0, 0) .
   eq sumWPos(msg(O, V, B) MS) = (V * B) + sumWPos(MS) .
 
-  ceq calcEstPos(V, MS) = 
-    (if (W >= trustThreshold) then (sumWPos(MS) / W) else V fi)
-    if W := sumWeights(MS) .
+  op sumBeliefWeights : loc Configuration -> Rat .
+  eq sumBeliefWeights(EP, none) = 0/1 .
+  eq sumBeliefWeights(EP, msg(O, V, B) MS) = 
+     (B * (if distSq(EP, V) > 4/1 then 1/2 else 1/1 fi)) + sumBeliefWeights(EP, MS) .
 
-  ceq calcBelief(B, MS) = 
+  ceq calcEstPos(EP, B, MS) = 
+      (if (W >= trustThreshold) 
+      --- NEW: (Your position * your belief + Swarm position) / Total Belief
+      then (((EP * B) + sumWPos(MS)) / (B + W)) 
+      else EP fi)
+      if W := sumWeights(MS) .
+
+  ceq calcBelief(B, EP, MS) = 
     (if (W >= trustThreshold) 
      then (if (B + (consensusBonus * W) > 1/1) then 1/1 else (B + (consensusBonus * W)) fi) 
-     else (if B > 1/50 then B - 1/50 else 0 fi) fi)
-    if W := sumWeights(MS) .
-    
+     else (if B > 1/50 then B - 1/50 else 0/1 fi) fi)
+    if W := sumBeliefWeights(EP, MS) .
 endom

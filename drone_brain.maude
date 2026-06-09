@@ -21,12 +21,12 @@ mod DRONE-BRAIN is
                     heading : NEW-H,
                     inbox : none >
       if < O : Drone | pos : P, estPos : EP, goalPos : G, belief : B, speed : S, heading : H, inbox : MS > := D
-      /\ NEW-EP := calcEstPos(EP, MS)
-      /\ NEW-B  := calcBelief(B, MS)
+      /\ NEW-EP := calcEstPos(EP, B, MS)
+      /\ NEW-B  := calcBelief(B, EP, MS)
       /\ NEW-H  := bestDir(NEW-EP, G) .
       
-  op calcBelief : Rat Configuration -> Rat .
-  op calcEstPos : Position Configuration -> Position .
+  op calcBelief : Rat Position Configuration -> Rat .
+  op calcEstPos : Position Rat Configuration -> Position .
   op calcSpeed : Position Dir Rat Configuration -> Rat .
   op bestDir : Position Position -> Dir .
   

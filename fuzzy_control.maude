@@ -44,9 +44,9 @@ omod FUZZY-SPEED-CONTROL is
     ( (W1 * goalEmergency) + (W2 * goalLost) + (W3 * goalCaution) + (W4 * goalWary) + (W5 * goalCruise) ) / 
     (W1 + W2 + W3 + W4 + W5)
     if D   := distSq(P, DP)
-    /\ W1  := muNear(D) * (if isClosing(P, H, DP) then 1/1 else 0/1 fi)
+    /\ W1  := DangerB * muNear(D) * (if isClosing(P, H, DP) then 1/1 else 0/1 fi)
     /\ W2  := muLost(B)
-    /\ W3  := muNear(D) * muConfident(B)
+    /\ W3  := DangerB * muNear(D) * muConfident(B)
     /\ W4  := muWary(B)
     /\ W5  := muFar(D) * muConfident(B) .
 
