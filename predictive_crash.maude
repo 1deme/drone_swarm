@@ -4,7 +4,6 @@ omod PREDICTIVE-CRASH is
   protecting RAT .
   protecting BOOL .
 
-  --- NEW: Bridge the generic framework types with the strict 3D geometry types!
   subsort loc < Position .
   subsort Dir3D < Dir .
 
@@ -18,47 +17,29 @@ omod PREDICTIVE-CRASH is
   
   vars P1 P2 V1 V2 Prel Vrel : loc .
   vars S1 S2 T T1 T2 CPA DistSq : Rat . 
-  vars H1 H2 : Dir3D . --- FIXED: Strictly typed to Dir3D for geometry math
+  vars H1 H2 : Dir3D .
   vars X1 X2 Y1 Y2 Z1 Z2 : Rat .
   vars AS1 AS2 : AttributeSet .
   var C : Configuration .
 
-  --- Vector Math Helpers
-  op getVelocity : Rat Dir3D -> loc . --- FIXED: Signature expects Dir3D
-  ceq getVelocity(S1, H1) = v(S1 * X1, S1 * Y1, S1 * Z1) 
-    if v(X1, Y1, Z1) := dirToVec(H1) .
-  eq getVelocity(S1, H1) = v(0/1, 0/1, 0/1) [owise] .
+  op getVelocity : Rat Dir3D -> loc .
+  eq getVelocity(S1, H1) = dirToVec(H1) * S1 .
 
-  op dotProd : loc loc -> Rat .
-  eq dotProd(v(X1, Y1, Z1), v(X2, Y2, Z2)) = (X1 * X2) + (Y1 * Y2) + (Z1 * Z2) .
-
-  op vecSub : loc loc -> loc .
-  eq vecSub(v(X1, Y1, Z1), v(X2, Y2, Z2)) = v(X1 - X2, Y1 - Y2, Z1 - Z2) .
-
-  op vecAdd : loc loc -> loc .
-  eq vecAdd(v(X1, Y1, Z1), v(X2, Y2, Z2)) = v(X1 + X2, Y1 + Y2, Z1 + Z2) .
-
-  op vecMult : loc Rat -> loc .
-  eq vecMult(v(X1, Y1, Z1), T) = v(X1 * T, Y1 * T, Z1 * T) .
-
-  --- Closest Point of Approach (CPA) Math
   op calcCpaTime : loc loc -> Rat .
   ceq calcCpaTime(Prel, Vrel) = - dotProd(Prel, Vrel) / dotProd(Vrel, Vrel) 
     if dotProd(Vrel, Vrel) =/= 0/1 .
   eq calcCpaTime(Prel, Vrel) = 0/1 [owise] . 
 
-  --- Swept Sphere Collision Check
   op checkSweptCollision : loc loc loc loc -> Rat .
   ceq checkSweptCollision(P1, V1, P2, V2) = CPA
-    if Prel := vecSub(P1, P2)
-    /\ Vrel := vecSub(V1, V2)
-    /\ CPA := calcCpaTime(Prel, Vrel)
-    /\ CPA >= 0/1 /\ CPA <= 1/1
-    /\ DistSq := distSq(vecAdd(P1, vecMult(V1, CPA)), vecAdd(P2, vecMult(V2, CPA)))
-    /\ DistSq <= crashThresholdSq .
-  eq checkSweptCollision(P1, V1, P2, V2) = 2/1 [owise] . 
-
-  --- The Scanner
+      if Prel := P1 - P2
+      /\ Vrel := V1 - V2
+      /\ CPA := calcCpaTime(Prel, Vrel)
+      /\ CPA >= 0/1 /\ CPA <= 1/1
+      /\ DistSq := distSq(P1 + (V1 * CPA), P2 + (V2 * CPA))
+      /\ DistSq <= crashThresholdSq .
+  eq checkSweptCollision(P1, V1, P2, V2) = 2/1 [owise] .
+    
   op minCrash : CrashEvent CrashEvent -> CrashEvent .
   eq minCrash(noCrash, CE2) = CE2 .
   eq minCrash(crashAt(O1, O2, T1), noCrash) = crashAt(O1, O2, T1) .
@@ -82,15 +63,14 @@ omod PREDICTIVE-CRASH is
     /\ T := checkSweptCollision(P1, V1, P2, V2) .
   eq checkAllPairs(Obj, C) = noCrash [owise] .
 
-  --- The Resolver
   op removeDrones : Configuration Oid Oid -> Configuration .
   eq removeDrones(< O1 : Drone | AS1 > < O2 : Drone | AS2 > C, O1, O2) = C .
   eq removeDrones(C, O1, O2) = C [owise] .
 
-  op resolveChronological : Configuration -> Configuration .
-  ceq resolveChronological(C) = 
-      resolveChronological( removeDrones(C, O1, O2) )
+  op resolveCollisions : Configuration -> Configuration .
+  ceq resolveCollisions(C) = 
+      resolveCollisions( removeDrones(C, O1, O2) )
       if crashAt(O1, O2, T) := findEarliestCrash(C) .
-  eq resolveChronological(C) = C [owise] .
+  eq resolveCollisions(C) = C [owise] .
 
 endom

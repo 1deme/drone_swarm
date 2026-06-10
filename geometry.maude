@@ -59,6 +59,10 @@ fmod GEOMETRY is
   op _/_ : loc Rat -> loc .
   eq v(X, Y, Z) / R = v(X / R, Y / R, Z / R) .
 
+  op dotProd : loc loc -> Rat .
+  eq dotProd(v(X1, Y1, Z1), v(X2, Y2, Z2)) = (X1 * X2) + (Y1 * Y2) + (Z1 * Z2) .
+
+
   op distSq : loc loc -> Rat .
   eq distSq(v(X1, Y1, Z1), v(X2, Y2, Z2)) = 
     ((X1 - X2) * (X1 - X2)) + 

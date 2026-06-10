@@ -69,22 +69,10 @@ omod GENERAL-FRAMEWORK is
   op applyPhysics : Configuration Disturbance -> Configuration .
   eq applyPhysics(C, D) = applyPhysicsAcc(C, none, D) .
 
-  op resolveChronological : Configuration -> Configuration .
+  op resolveCollisions : Configuration -> Configuration .
 
-  op performStep : Configuration Disturbance -> Configuration .
-    eq performStep(C, D) = 
-      broadcastAll(
-        applyPhysics(
-          resolveChronological(
-            thinkAll(
-              perceiveEnvironment(C)
-            )
-          ), 
-          D
-        )
-      ) .
-
-  crl [performBigStep] : { C } => { performStep(C, D) } 
+  crl [performBigStep] : 
+      { C } => { broadcastAll(applyPhysics(resolveCollisions(thinkAll(perceiveEnvironment(C))), D)) } 
       if D ; DS := possibleDisturbances .
 
 endom

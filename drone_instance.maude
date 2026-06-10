@@ -5,8 +5,6 @@ omod DRONE-INSTANCE is
   protecting FUSION-LOGIC .
   protecting FUZZY-SPEED-CONTROL .
 
-  subsort loc < Position .
-
   op wind : loc -> Disturbance [ctor] .
   op d : Nat -> Oid [ctor] .
 
