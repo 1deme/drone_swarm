@@ -32,7 +32,6 @@ omod FUSION-LOGIC is
 
   ceq calcEstPos(EP, B, MS) = 
       (if (W >= trustThreshold) 
-      --- NEW: (Your position * your belief + Swarm position) / Total Belief
       then (((EP * B) + sumWPos(MS)) / (B + W)) 
       else EP fi)
       if W := sumWeights(MS) .

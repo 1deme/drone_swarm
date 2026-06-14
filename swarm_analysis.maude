@@ -14,14 +14,10 @@ mod SWARM-ANALYSIS is
   op TrustThreasholdSq : -> Rat .
   eq TrustThreasholdSq = 25/1 .
 
-  op sqEuclideanDist : loc loc -> Rat .
-  eq sqEuclideanDist(v(X1, Y1, Z1), v(X2, Y2, Z2)) = 
-     ((X1 - X2) * (X1 - X2)) + ((Y1 - Y2) * (Y1 - Y2)) + ((Z1 - Z2) * (Z1 - Z2)) .
-
   op sumSwarmSuccess : Configuration -> Rat .
   eq sumSwarmSuccess(none) = 0/1 .
   eq sumSwarmSuccess(< OID : Drone | pos : P, goalPos : G, AS > C) = 
-     (1/1 - (sqEuclideanDist(P, G) / MAaxSqDist)) + sumSwarmSuccess(C) .
+     (1/1 - (distSq(P, G) / MAaxSqDist)) + sumSwarmSuccess(C) .
 
   op swarmSuccess : Configuration Nat -> Rat .
   eq swarmSuccess(C, N) = sumSwarmSuccess(C) / N .
@@ -29,8 +25,8 @@ mod SWARM-ANALYSIS is
   op sumEpistemicSuccess : Configuration -> Rat .
   eq sumEpistemicSuccess(none) = 0/1 .
   eq sumEpistemicSuccess(< OID : Drone | pos : P, estPos : EP, AS > C) = 
-     (if sqEuclideanDist(P, EP) >= TrustThreasholdSq then 0/1
-      else 1/1 - (sqEuclideanDist(P, EP) / TrustThreasholdSq) fi) 
+     (if distSq(P, EP) >= TrustThreasholdSq then 0/1
+      else 1/1 - (distSq(P, EP) / TrustThreasholdSq) fi) 
      + sumEpistemicSuccess(C) .
 
   op meanEpistemicSuccess : Configuration Nat -> Rat .

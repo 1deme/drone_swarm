@@ -9,10 +9,10 @@ mod DRONE-BRAIN is
   var AS : AttributeSet .
   var MS : Configuration .
   var M BEST-MSG : Msg .
-  var D : Object .
 
   op think : Object -> Object .
-  ceq think(D) =
+  ceq think(< O : Drone 
+  | pos : P, estPos : EP, goalPos : G, belief : B, speed : S, heading : H, inbox : MS >) =
       < O : Drone | pos : P,
                     estPos : NEW-EP,
                     goalPos : G,
@@ -20,8 +20,7 @@ mod DRONE-BRAIN is
                     speed : calcSpeed(NEW-EP, NEW-H, NEW-B, MS), 
                     heading : NEW-H,
                     inbox : none >
-      if < O : Drone | pos : P, estPos : EP, goalPos : G, belief : B, speed : S, heading : H, inbox : MS > := D
-      /\ NEW-EP := calcEstPos(EP, B, MS)
+      if NEW-EP := calcEstPos(EP, B, MS)
       /\ NEW-B  := calcBelief(B, EP, MS)
       /\ NEW-H  := bestDir(NEW-EP, G) .
       
