@@ -3,30 +3,36 @@ omod SWARM-META-ANALYSIS is
   protecting SWARM-ANALYSIS .
 
   sort MetaState .
+  op [ _ | _ , _ ] : Configuration Nat Nat -> MetaState [ctor] . 
 
-  op [ _ | _ , _ ] : System Nat Nat -> MetaState [ctor] . 
+  sort SystemSet .
+  subsort System < SystemSet .
+  op emptySysSet : -> SystemSet [ctor] .
+  op _||_ : SystemSet SystemSet -> SystemSet [ctor assoc comm id: emptySysSet] .
 
-  vars S S' : System .
-  var C : Configuration .
-  vars N IC : Nat .
+  vars C C' : Configuration .
+  vars N IC I : Nat .
   var T' : Term .   
   var TY : Type .   
-  var SUB : Substitution .   
+  var SUB : Substitution .
+  var SYS-SET : SystemSet .
 
   op initAnalysis : Configuration -> MetaState .
-  eq initAnalysis(C) = [ { C } | 0 , countDrones(C) ] .
+  eq initAnalysis(C) = [ C | 0 , countDrones(C) ] .
 
   op metaObjectiveAccomplished : Configuration Nat -> Bool .
-  eq metaObjectiveAccomplished(C, IC) = swarmSuccess(C, IC) >= 9/10 .
+  eq metaObjectiveAccomplished(C, IC) = swarmSuccess(C, IC) >= 99/100 .
+
+  op getNextStates : Configuration Nat -> SystemSet .
+  ceq getNextStates(C, I) = 
+      downTerm(T', { none }) || getNextStates(C, I + 1)
+    if { T' , TY , SUB } := metaApply(upModule('SWARM-ANALYSIS, false), upTerm({ C }), 'performSyncStep, none, I) .
+  
+  eq getNextStates(C, I) = emptySysSet [owise] .
 
   crl [trackedStep] : 
-    [ { C } | N , IC ] => [ S' | N + 1 , IC ] 
+    [ C | N , IC ] => [ C' | N + 1 , IC ] 
     if not metaObjectiveAccomplished(C, IC)
-                /\ { T' , TY , SUB } := metaApply(
-                             upModule('SWARM-ANALYSIS, false), 
-                             upTerm({ C }), 
-                             'performBigStep, 
-                             none, 0
-                    )
-                /\ S' := downTerm(T', { none }) .
+    /\ { C' } || SYS-SET := getNextStates(C, 0) .
+
 endom

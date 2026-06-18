@@ -71,7 +71,7 @@ omod GENERAL-FRAMEWORK is
 
   op resolveCollisions : Configuration -> Configuration .
 
-  crl [performBigStep] : 
+  crl [performSyncStep] : 
       { C } => { broadcastAll(applyPhysics(resolveCollisions(thinkAll(perceiveEnvironment(C))), D)) } 
       if D ; DS := possibleDisturbances .
 

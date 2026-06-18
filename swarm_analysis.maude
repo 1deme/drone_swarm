@@ -17,7 +17,10 @@ mod SWARM-ANALYSIS is
   op sumSwarmSuccess : Configuration -> Rat .
   eq sumSwarmSuccess(none) = 0/1 .
   eq sumSwarmSuccess(< OID : Drone | pos : P, goalPos : G, AS > C) = 
-     (1/1 - (distSq(P, G) / MAaxSqDist)) + sumSwarmSuccess(C) .
+     (if distSq(P, G) >= MAaxSqDist 
+      then 0/1 
+      else 1/1 - (distSq(P, G) / MAaxSqDist) fi) 
+     + sumSwarmSuccess(C) .
 
   op swarmSuccess : Configuration Nat -> Rat .
   eq swarmSuccess(C, N) = sumSwarmSuccess(C) / N .
