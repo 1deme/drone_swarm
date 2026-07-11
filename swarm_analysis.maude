@@ -1,12 +1,10 @@
 mod SWARM-ANALYSIS is
   protecting DRONE-INSTANCE .
+  protecting ANALYSIS-FRAMEWORK .
 
-  vars C : Configuration .
   vars P G EP : loc .
-  var N : Nat .
   var OID : Oid .
   var AS : AttributeSet .
-  vars X1 Y1 Z1 X2 Y2 Z2 DT : Rat .
 
   op MAaxSqDist : -> Rat .
   eq MAaxSqDist = 2700/1 .
@@ -14,29 +12,13 @@ mod SWARM-ANALYSIS is
   op TrustThreasholdSq : -> Rat .
   eq TrustThreasholdSq = 25/1 .
 
-  op sumSwarmSuccess : Configuration -> Rat .
-  eq sumSwarmSuccess(none) = 0/1 .
-  eq sumSwarmSuccess(< OID : Drone | pos : P, goalPos : G, AS > C) = 
-     (if distSq(P, G) >= MAaxSqDist 
-      then 0/1 
-      else 1/1 - (distSq(P, G) / MAaxSqDist) fi) 
-     + sumSwarmSuccess(C) .
+  eq scoreDroneProgress(< OID : Drone | pos : P, goalPos : G, AS >) =
+     if distSq(P, G) >= MAaxSqDist 
+     then 0/1 
+     else 1/1 - (distSq(P, G) / MAaxSqDist) fi .
 
-  op swarmSuccess : Configuration Nat -> Rat .
-  eq swarmSuccess(C, N) = sumSwarmSuccess(C) / N .
-
-  op sumEpistemicSuccess : Configuration -> Rat .
-  eq sumEpistemicSuccess(none) = 0/1 .
-  eq sumEpistemicSuccess(< OID : Drone | pos : P, estPos : EP, AS > C) = 
-     (if distSq(P, EP) >= TrustThreasholdSq then 0/1
-      else 1/1 - (distSq(P, EP) / TrustThreasholdSq) fi) 
-     + sumEpistemicSuccess(C) .
-
-  op meanEpistemicSuccess : Configuration Nat -> Rat .
-  eq meanEpistemicSuccess(C, N) = sumEpistemicSuccess(C) / N .
-
-  op countDrones : Configuration -> Nat .
-  eq countDrones(< OID : Drone | AS > C) = 1 + countDrones(C) .
-  eq countDrones(C) = 0 [owise] .
-
+  eq scoreDroneEpistemic(< OID : Drone | pos : P, estPos : EP, AS >) =
+     if distSq(P, EP) >= TrustThreasholdSq 
+     then 0/1
+     else 1/1 - (distSq(P, EP) / TrustThreasholdSq) fi .
 endm

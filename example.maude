@@ -1,7 +1,30 @@
 search [1, 10] in SWARM-META-ANALYSIS : 
   initAnalysis(
-    < d(1) : Drone | pos : v(30, 30, 30), estPos : v(30, 30, 30), goalPos : v(40, 40, 40), 
+    < d(1) : Drone | pos : v(20, 20, 20), estPos : v(30, 30, 30), goalPos : v(40, 40, 40), 
                      belief : 1/1, speed : 1/1, heading : E, inbox : none > 
   ) 
   =>* [ C:Configuration | N:Nat, IC:Nat ] 
   such that N >= 10 and not metaObjectiveAccomplished(C, IC) .
+
+  search [1, 10] in SWARM-META-ANALYSIS :
+initAnalysis(
+< d(1) : Drone | pos : v(0, 0, 0),
+estPos : v(0, 0, 0), goalPos : v(20, 20, 0),
+belief : 1, speed : 1, heading : NE, inbox : none >
+< d(2) : Drone | pos : v(5, 5, 0),
+estPos : v(5, 5, 0), goalPos : v(20, 29, 0),
+belief : 1, speed : 1, heading : NE, inbox : none >
+)
+=>* [ C:Configuration | N:Nat, IC:Nat ]
+such that meanEpistemicSuccess(C:Configuration, IC:Nat) < 999/1000 .
+
+search [1, 100] in SWARM-META-ANALYSIS :
+initAnalysis(
+< d(1) : Drone |
+pos : v(0, 0, 0), estPos : v(0, 0, 0), goalPos : v(20, 20, 0),
+belief : 1, speed : 1, heading : NE, inbox : none >
+< d(2) : Drone |
+pos : v(5, 5, 0), estPos : v(5, 5, 0), goalPos : v(20, 29, 0),
+belief : 1, speed : 1, heading : NE, inbox : none >)
+=>* [ C:Configuration | N:Nat, IC:Nat ]
+such that N:Nat <= 100 and countAgents(C:Configuration) < IC:Nat .
