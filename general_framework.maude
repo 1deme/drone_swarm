@@ -29,11 +29,12 @@ omod GENERAL-FRAMEWORK is
   var D : Disturbance .
   var DS : DisturbanceSet .
 
+  op period : -> Rat .
 
   op hasReliablePerception : Position -> Bool .
   op inCommunicationRange : Position Position -> Bool .
-  op updatePhysicalState : Position Rat Dir Disturbance  -> Position .
-  op estimateNextPosition : Position Rat Dir  -> Position .
+  op updatePhysicalState : Position Rat Dir Disturbance Rat  -> Position .
+  op estimateNextPosition : Position Rat Dir Rat -> Position .
   op isCollision : Position Position -> Bool .
   op crashThresholdSq : -> Rat .
   op possibleDisturbances : -> DisturbanceSet .
@@ -61,8 +62,8 @@ omod GENERAL-FRAMEWORK is
      applyPhysicsAcc(
         C, 
         Acc (< ID : Drone | 
-                pos : updatePhysicalState(P, S, H, D),
-                estPos : estimateNextPosition(EP, S, H) >),
+                pos : updatePhysicalState(P, S, H, D, period),
+                estPos : estimateNextPosition(EP, S, H, period) >),
         D
       ) .
 
