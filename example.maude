@@ -1,30 +1,370 @@
-search [1, 10] in SWARM-META-ANALYSIS : 
+***
+*** test_ordering.maude
+***
+*** Layered test suite for the belief/estPos ordering fix.
+***
+*** METHOD: each layer is built ONLY from values produced by earlier layers.
+*** Nobody has to guess an expected answer: a later test is correct iff it
+*** equals a function of earlier printed outputs. Where a value is fully
+*** determined by arithmetic, it is written in the comment as [EXPECT ...].
+*** Where it depends on YOUR definition of projectBelief, it is written as
+*** [DERIVE: ...] and must be checked against the earlier printed value.
+***
+*** RUN WITH:   maude load_all.maude test_ordering.maude
+*** (or: load load_all.maude   then   load test_ordering.maude)
+***
+
+load load_all.maude
+
+***
+*** =====================================================================
+*** LAYER 0 - PRIMITIVES  (anchors: pure arithmetic, no model semantics)
+*** =====================================================================
+*** If any of these is wrong, nothing below is meaningful.
+***
+
+red in SWARM-META-ANALYSIS : "== L0 primitives ==" .
+
+*** L0.1  [EXPECT 1]  period must be 1, every later projection assumes it
+red in SWARM-META-ANALYSIS : period .
+
+*** L0.2  [EXPECT 50]
+red in SWARM-META-ANALYSIS : distSq(v(0,0,0), v(5,5,0)) .
+
+*** L0.3  [EXPECT 18]
+red in SWARM-META-ANALYSIS : distSq(v(0,0,0), v(3,3,0)) .
+
+*** L0.4  [EXPECT false]  50 > 25, so the two drones in example.maude
+***       start OUT of range. Cross-checked by L6.
+red in SWARM-META-ANALYSIS : inCommunicationRange(v(0,0,0), v(5,5,0)) .
+
+*** L0.5  [EXPECT true]   18 <= 25
+red in SWARM-META-ANALYSIS : inCommunicationRange(v(0,0,0), v(3,3,0)) .
+
+*** L0.6  [EXPECT true]   distSq = 0 <= 64  (centre of the reliable zone)
+red in SWARM-META-ANALYSIS : hasReliablePerception(v(15,15,15)) .
+
+*** L0.7  [EXPECT false]  distSq = 75 > 64
+red in SWARM-META-ANALYSIS : hasReliablePerception(v(20,20,20)) .
+
+*** L0.8  [EXPECT v(6/10,6/10,6/10)]
+red in SWARM-META-ANALYSIS : dirToVec(NEU) .
+
+*** L0.9  [EXPECT NEU]  pure diagonal goal => diagonal-up heading.
+***       Used as the expected heading in L2/L3.
+red in SWARM-META-ANALYSIS : bestDir(v(20,20,20), v(40,40,40)) .
+
+
+***
+*** =====================================================================
+*** LAYER 1 - THE TWO BELIEF FUNCTIONS, IN ISOLATION
+*** =====================================================================
+*** This layer exists to answer ONE question: does belief now decay
+*** once per round, or twice? L1.1 is the decay inside calcBelief that
+*** was already in fusion_logic.maude. L1.2 is the new projectBelief.
+*** L1.3 is their composition = exactly what think/ should produce.
+***
+
+red in SWARM-META-ANALYSIS : "== L1 belief functions ==" .
+
+*** L1.1  [EXPECT 49/50]  empty inbox => W=0 < trustThreshold(1)
+***       => else-branch => B - 1/50 = 1 - 1/50
+red in SWARM-META-ANALYSIS : calcBelief(1/1, v(20,20,20), none) .
+
+*** L1.2  [DERIVE] projectBelief applied to the SAME input as L1.1.
+***       If this returns 49/50 too, projectBelief decays by 1/50.
+red in SWARM-META-ANALYSIS : projectBelief(1/1, period) .
+
+*** L1.3  [DERIVE = projectBelief(L1.1)] the composition think/ performs.
+***       *** DIAGNOSTIC ***
+***       If L1.3 == L1.1  -> projectBelief is the identity, single decay.
+***       If L1.3 <  L1.1  -> DOUBLE DECAY: calcBelief and projectBelief
+***                           are both shrinking belief in one round.
+***       Compare against L2.2 which must be identical.
+red in SWARM-META-ANALYSIS : projectBelief(calcBelief(1/1, v(20,20,20), none), period) .
+
+*** L1.4  boundary probe. muLost(1/2)=0 and muConfident(1/2)=0, so the
+***       empty-inbox branch of evalSpeedSet divides 0 by 0.
+***       [EXPECT: an un-reduced term / error, NOT a number]
+red in SWARM-META-ANALYSIS : evalSpeedSet(v(0,0,0), E, 1/2, none) .
+
+*** L1.5  [EXPECT 1]  sanity: high belief, no neighbours => full cruise.
+***       Used as expected speed in L2.
+red in SWARM-META-ANALYSIS : evalSpeedSet(v(20,20,20), NEU, 49/50, none) .
+
+
+***
+*** =====================================================================
+*** LAYER 2 - think/ ON ONE DRONE, NO INBOX, OUTSIDE PERCEPTION ZONE
+*** =====================================================================
+*** Everything here is predicted by L0+L1:
+***   FUSED-EP = calcEstPos(EP,B,none) = EP          (W=0 < threshold)
+***   FUSED-B  = L1.1
+***   NEW-H    = L0.9  = NEU
+***   NEW-S    = L1.5  = 1
+***   PROJ-EP  = EP + dirToVec(NEU)*1  = v(103/5,103/5,103/5)
+***   PROJ-B   = L1.3
+***
+
+red in SWARM-META-ANALYSIS : "== L2 think, isolated ==" .
+
+*** L2.1 full object. Check each attribute against the predictions above.
+red in SWARM-META-ANALYSIS :
+  think(< d(1) : Drone | pos : v(20,20,20), estPos : v(20,20,20),
+                          goalPos : v(40,40,40), belief : 1/1,
+                          speed : 1/1, heading : E, inbox : none >) .
+
+*** L2.2  [MUST EQUAL L1.3]  the belief attribute alone, recomputed.
+***       If L2.1's belief differs from L1.3, think/ is not composing
+***       calcBelief and projectBelief the way the fix intends.
+red in SWARM-META-ANALYSIS : projectBelief(calcBelief(1/1, v(20,20,20), none), period) .
+
+*** L2.3  [MUST EQUAL L2.1's estPos]  independent recomputation of PROJ-EP.
+red in SWARM-META-ANALYSIS : estimateNextPosition(v(20,20,20), 1/1, NEU, period) .
+
+
+***
+*** =====================================================================
+*** LAYER 3 - applyPhysics MUST NOW TOUCH ONLY pos
+*** =====================================================================
+*** estPos is deliberately set to a value think/ would never produce
+*** v(9,9,9)) so that any change to it is visible immediately.
+***   pos' = v(0,0,0) + dirToVec(E)*1 + wind*1 = v(1,1/10,0)
+***
+
+red in SWARM-META-ANALYSIS : "== L3 applyPhysics ==" .
+
+*** L3.1  [EXPECT pos = v(1,1/10,0), estPos = v(9,9,9) UNCHANGED,
+***               belief = 1 UNCHANGED]
+***       If estPos moved, the old estimateNextPosition line is still in
+***       applyPhysicsAcc and is overwriting think/'s result.
+red in SWARM-META-ANALYSIS :
+  applyPhysics(< d(1) : Drone | pos : v(0,0,0), estPos : v(9,9,9),
+                                 goalPos : v(1,1,1), belief : 1/1,
+                                 speed : 1/1, heading : E, inbox : none >,
+               wind(v(0,1/10,0))) .
+
+*** L3.2  [EXPECT v(1,1/10,0)]  independent recomputation of pos'.
+red in SWARM-META-ANALYSIS : updatePhysicalState(v(0,0,0), 1/1, E, wind(v(0,1/10,0)), period) .
+
+
+***
+*** =====================================================================
+*** LAYER 4 - ONE WHOLE SYNCHRONOUS STEP
+*** =====================================================================
+*** A single drone, no neighbours, outside the perception zone, so the
+*** step reduces to: think (L2) then applyPhysics-on-pos (L3).
+*** The result must be reconstructible from L2 and L3 by hand:
+***   estPos, belief, speed, heading  <- exactly L2.1
+***   pos                             <- L3-style update of v(20,20,20)
+***
+
+red in SWARM-META-ANALYSIS : "== L4 one full step ==" .
+
+*** L4.1 one rewrite = one performSyncStep.
+***      [CROSS-CHECK] its estPos/belief/heading/speed must match L2.1.
+rew [1] in SWARM-META-ANALYSIS :
+  { < d(1) : Drone | pos : v(20,20,20), estPos : v(20,20,20),
+                      goalPos : v(40,40,40), belief : 1/1,
+                      speed : 1/1, heading : E, inbox : none > } .
+
+*** L4.2 two steps. estPos should advance by dirToVec(NEU) again, and
+***      belief should drop by exactly the SAME amount it dropped in L4.1.
+***      [DIAGNOSTIC] a per-step belief drop of 2/50 here versus 1/50
+***      expected from L1.1 alone confirms the double decay.
+rew [2] in SWARM-META-ANALYSIS :
+  { < d(1) : Drone | pos : v(20,20,20), estPos : v(20,20,20),
+                      goalPos : v(40,40,40), belief : 1/1,
+                      speed : 1/1, heading : E, inbox : none > } .
+
+
+***
+*** =====================================================================
+*** LAYER 5 - PERCEPTION OVERRIDE
+*** =====================================================================
+*** Drone sits at the centre of the reliable zone with a badly wrong
+*** estPos and a low belief. The override in think/ must discard both.
+***   FUSED-EP = pos = v(15,15,15)     (NOT fused with v(30,30,30))
+***   FUSED-B  = 1
+***   PROJ-B   = projectBelief(1, 1)   = L1.2
+***
+
+red in SWARM-META-ANALYSIS : "== L5 perception override ==" .
+
+*** L5.1  [EXPECT estPos to be v(15,15,15) + dirToVec(bestDir) ,
+***               i.e. derived from pos, with NO trace of v(30,30,30)]
+***       [EXPECT belief == L1.2]
+***       If belief here is 1, projectBelief is identity.
+***       If belief here is < 1, a perfect GPS fix still loses confidence
+***       in the same round it was acquired - report this, it is a
+***       modelling decision that needs to be deliberate.
+red in SWARM-META-ANALYSIS :
+  think(< d(1) : Drone | pos : v(15,15,15), estPos : v(30,30,30),
+                          goalPos : v(40,40,40), belief : 1/10,
+                          speed : 1/1, heading : E, inbox : none >) .
+
+*** L5.2 the same drone through a whole step, with perceiveEnvironment
+***      in front of it. Must agree with L5.1 on estPos/belief.
+***      [CROSS-CHECK] if L5.1 and L5.2 disagree, perceiveEnvironment and
+***      the in-think override are fighting each other.
+rew [1] in SWARM-META-ANALYSIS :
+  { < d(1) : Drone | pos : v(15,15,15), estPos : v(30,30,30),
+                      goalPos : v(40,40,40), belief : 1/10,
+                      speed : 1/1, heading : E, inbox : none > } .
+
+
+***
+*** =====================================================================
+*** LAYER 6 - FUSION ACTUALLY FIRING
+*** =====================================================================
+*** L0.4 showed v(0,0,0)/v(5,5,0) are NOT in range, so those two never
+*** fuse on round 1. Here they are placed at distSq = 18 (in range) so
+*** WCL runs. Both have belief 1, so W = 1 >= trustThreshold.
+***   calcEstPos = ((EP*1) + (V*1)) / (1+1) = midpoint
+***
+
+red in SWARM-META-ANALYSIS : "== L6 fusion ==" .
+
+*** L6.1  [EXPECT the midpoint of v(0,0,0) and v(3,3,0) = v(3/2,3/2,0)]
+***       pure WCL check, no drones involved.
+red in SWARM-META-ANALYSIS : calcEstPos(v(0,0,0), 1/1, msg(d(2), v(3,3,0), 1/1)) .
+
+*** L6.2  [EXPECT reinforcement, not decay: W >= 1 so belief goes UP,
+***       capped at 1. distSq(v(0,0,0),v(3,3,0)) = 18 > 4, so the
+***       sumBeliefWeights discount of 1/2 applies => W = 1/2.
+***       1/2 < trustThreshold(1) => actually the DECAY branch fires.]
+***       *** This mismatch between calcEstPos's W (=1, undiscounted)
+***       *** and calcBelief's W (=1/2, discounted) is worth noting:
+***       *** position fuses but belief simultaneously decays.
+red in SWARM-META-ANALYSIS : calcBelief(1/1, v(0,0,0), msg(d(2), v(3,3,0), 1/1)) .
+
+*** L6.3 two drones IN range, one full step. Round 1 has empty inboxes
+***      nothing has been broadcast yet), so round 1 must equal the
+***      no-neighbour case; fusion can only appear from round 2.
+***      [CROSS-CHECK] compare round-1 belief here with L4.1's.
+rew [1] in SWARM-META-ANALYSIS :
+  { < d(1) : Drone | pos : v(0,0,0), estPos : v(0,0,0), goalPos : v(20,20,0),
+                      belief : 1/1, speed : 1/1, heading : NE, inbox : none >
+    < d(2) : Drone | pos : v(3,3,0), estPos : v(3,3,0), goalPos : v(20,29,0),
+                      belief : 1/1, speed : 1/1, heading : NE, inbox : none > } .
+
+*** L6.4 three steps: by now messages have flowed and WCL has fired.
+***      Check estPos values have been pulled toward each other relative
+***      to what pure dead-reckoning (L2.3-style) would give.
+rew [3] in SWARM-META-ANALYSIS :
+  { < d(1) : Drone | pos : v(0,0,0), estPos : v(0,0,0), goalPos : v(20,20,0),
+                      belief : 1/1, speed : 1/1, heading : NE, inbox : none >
+    < d(2) : Drone | pos : v(3,3,0), estPos : v(3,3,0), goalPos : v(20,29,0),
+                      belief : 1/1, speed : 1/1, heading : NE, inbox : none > } .
+
+
+***
+*** =====================================================================
+*** LAYER 7 - INVARIANTS VIA SEARCH  (the real regression tests)
+*** =====================================================================
+*** These are the ones that must not silently change when the ordering
+*** is edited again later.
+***
+
+red in SWARM-META-ANALYSIS : "== L7 invariants ==" .
+
+*** L7.1 BELIEF STAYS IN RANGE.
+***      Belief is specified as a value in [0,1]. Look for any reachable
+***      state violating that.
+***      [EXPECT: No solution]
+***      A solution here means a decay/reinforce path drives belief out
+***      of its own domain - a hard bug, independent of ordering.
+search [1, 12] in SWARM-META-ANALYSIS :
   initAnalysis(
-    < d(1) : Drone | pos : v(20, 20, 20), estPos : v(30, 30, 30), goalPos : v(40, 40, 40), 
-                     belief : 1/1, speed : 1/1, heading : E, inbox : none > 
-  ) 
-  =>* [ C:Configuration | N:Nat, IC:Nat ] 
-  such that N >= 10 and not metaObjectiveAccomplished(C, IC) .
+    < d(1) : Drone | pos : v(20,20,20), estPos : v(20,20,20),
+                      goalPos : v(40,40,40), belief : 1/1,
+                      speed : 1/1, heading : E, inbox : none >
+  )
+  =>* [ < d(1) : Drone | belief : B:Rat, AS:AttributeSet > | N:Nat, IC:Nat ]
+  such that B:Rat < 0/1 or B:Rat > 1/1 .
 
-  search [1, 10] in SWARM-META-ANALYSIS :
-initAnalysis(
-< d(1) : Drone | pos : v(0, 0, 0),
-estPos : v(0, 0, 0), goalPos : v(20, 20, 0),
-belief : 1, speed : 1, heading : NE, inbox : none >
-< d(2) : Drone | pos : v(5, 5, 0),
-estPos : v(5, 5, 0), goalPos : v(20, 29, 0),
-belief : 1, speed : 1, heading : NE, inbox : none >
-)
-=>* [ C:Configuration | N:Nat, IC:Nat ]
-such that meanEpistemicSuccess(C:Configuration, IC:Nat) < 999/1000 .
+*** L7.2 EPISTEMIC DRIFT IS BOUNDED WHILE ALONE.
+***      One drone, no neighbours, wind pushing it around. estPos is pure
+***      dead-reckoning so the gap grows by at most |wind|*period = 1/10
+***      per round. Over 10 rounds distSq(pos,estPos) <= (10*1/10)^2 = 1.
+***      [EXPECT: No solution]  If this finds a state, the gap is growing
+***      faster than the wind can explain => estPos is being updated
+***      somewhere it should not be (i.e. twice).
+search [1, 10] in SWARM-META-ANALYSIS :
+  initAnalysis(
+    < d(1) : Drone | pos : v(20,20,20), estPos : v(20,20,20),
+                      goalPos : v(40,40,40), belief : 1/1,
+                      speed : 1/1, heading : E, inbox : none >
+  )
+  =>* [ < d(1) : Drone | pos : P:loc, estPos : EP:loc, AS:AttributeSet > | N:Nat, IC:Nat ]
+  such that distSq(P:loc, EP:loc) > 1/1 .
 
-search [1, 100] in SWARM-META-ANALYSIS :
-initAnalysis(
-< d(1) : Drone |
-pos : v(0, 0, 0), estPos : v(0, 0, 0), goalPos : v(20, 20, 0),
-belief : 1, speed : 1, heading : NE, inbox : none >
-< d(2) : Drone |
-pos : v(5, 5, 0), estPos : v(5, 5, 0), goalPos : v(20, 29, 0),
-belief : 1, speed : 1, heading : NE, inbox : none >)
-=>* [ C:Configuration | N:Nat, IC:Nat ]
-such that N:Nat <= 100 and countAgents(C:Configuration) < IC:Nat .
+*** L7.3 PERCEPTION IS A FIXED POINT.
+***      A drone parked inside the reliable zone (goal = its own position,
+***      so bestDir should pick stop and it never leaves) must never let
+***      its estimate drift far from pos: it is re-anchored every round.
+***      [EXPECT: No solution]
+search [1, 10] in SWARM-META-ANALYSIS :
+  initAnalysis(
+    < d(1) : Drone | pos : v(15,15,15), estPos : v(15,15,15),
+                      goalPos : v(15,15,15), belief : 1/1,
+                      speed : 1/1, heading : E, inbox : none >
+  )
+  =>* [ < d(1) : Drone | pos : P:loc, estPos : EP:loc, AS:AttributeSet > | N:Nat, IC:Nat ]
+  such that distSq(P:loc, EP:loc) > 1/1 .
+
+*** L7.4 THE PAPER'S OWN QUERY, SHORT HORIZON.
+***      Paper says: fails at 10, succeeds at 15.
+***      [EXPECT: a solution]  (mission NOT yet accomplished at N=10)
+search [1, 10] in SWARM-META-ANALYSIS :
+  initAnalysis(
+    < d(1) : Drone | pos : v(30,30,30), estPos : v(30,30,30),
+                      goalPos : v(40,40,40), belief : 1/1,
+                      speed : 1/1, heading : E, inbox : none >
+  )
+  =>* [ C:Configuration | N:Nat, IC:Nat ]
+  such that N:Nat >= 10 and not metaObjectiveAccomplished(C:Configuration, IC:Nat) .
+
+*** L7.5 SAME QUERY, LONGER HORIZON.
+***      [EXPECT: No solution]  If L7.4 gives a solution and L7.5 does
+***      not, the paper's claim survives the ordering fix unchanged.
+***      If BOTH give solutions, the fix slowed the drone down - most
+***      likely because belief now decays twice and the fuzzy controller
+***      is throttling speed. That is the single most informative pair
+***      of results in this file.
+search [1, 15] in SWARM-META-ANALYSIS :
+  initAnalysis(
+    < d(1) : Drone | pos : v(30,30,30), estPos : v(30,30,30),
+                      goalPos : v(40,40,40), belief : 1/1,
+                      speed : 1/1, heading : E, inbox : none >
+  )
+  =>* [ C:Configuration | N:Nat, IC:Nat ]
+  such that N:Nat >= 15 and not metaObjectiveAccomplished(C:Configuration, IC:Nat) .
+
+*** L7.6 NO CRASHES between two converging drones.
+***      [EXPECT: No solution] if the fuzzy controller does its job.
+***      countDrones is used (countAgents in example.maude does not exist
+***      in the uploaded modules - that query would not have parsed).
+search [1, 12] in SWARM-META-ANALYSIS :
+  initAnalysis(
+    < d(1) : Drone | pos : v(0,0,0), estPos : v(0,0,0), goalPos : v(20,20,0),
+                      belief : 1/1, speed : 1/1, heading : NE, inbox : none >
+    < d(2) : Drone | pos : v(3,3,0), estPos : v(3,3,0), goalPos : v(20,29,0),
+                      belief : 1/1, speed : 1/1, heading : NE, inbox : none >
+  )
+  =>* [ C:Configuration | N:Nat, IC:Nat ]
+  such that countDrones(C:Configuration) < IC:Nat .
+
+*** L7.7 EPISTEMIC SUCCESS THRESHOLD (the paper's section 5.3 query).
+***      [EXPECT: No solution] at this horizon per the paper.
+search [1, 15] in SWARM-META-ANALYSIS :
+  initAnalysis(
+    < d(1) : Drone | pos : v(0,0,0), estPos : v(0,0,0), goalPos : v(20,20,0),
+                      belief : 1/1, speed : 1/1, heading : NE, inbox : none >
+    < d(2) : Drone | pos : v(5,5,0), estPos : v(5,5,0), goalPos : v(20,29,0),
+                      belief : 1/1, speed : 1/1, heading : NE, inbox : none >
+  )
+  =>* [ C:Configuration | N:Nat, IC:Nat ]
+  such that meanEpistemicSuccess(C:Configuration, IC:Nat) < 7/10 .
+
+red in SWARM-META-ANALYSIS : "== done ==" .

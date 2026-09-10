@@ -7,7 +7,7 @@ omod FUSION-LOGIC is
 
   vars O : Oid .
   vars V : loc .
-  vars B W : Rat .
+  vars B W Period : Rat .
   var MS : Configuration .
   var EP : Position .
 
@@ -39,6 +39,9 @@ omod FUSION-LOGIC is
   ceq calcBelief(B, EP, MS) = 
     (if (W >= trustThreshold) 
      then (if (B + (consensusBonus * W) > 1/1) then 1/1 else (B + (consensusBonus * W)) fi) 
-     else (if B > 1/50 then B - 1/50 else 0/1 fi) fi)
+     else B fi)
     if W := sumBeliefWeights(EP, MS) .
+
+  op projectBelief : Rat Rat -> Rat .
+  eq projectBelief(B, Period) = if B > (1/50) * Period then B - ((1/50) * Period) else 0/1 fi .
 endom

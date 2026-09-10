@@ -58,12 +58,11 @@ omod GENERAL-FRAMEWORK is
   
   eq applyPhysicsAcc(none, Acc, D) = Acc .
   
-  eq applyPhysicsAcc((< ID : Drone | pos : P, estPos : EP, speed : S, heading : H > C), Acc, D) =
+  eq applyPhysicsAcc((< ID : Drone | pos : P, speed : S, heading : H > C), Acc, D) =
      applyPhysicsAcc(
         C, 
         Acc (< ID : Drone | 
-                pos : updatePhysicalState(P, S, H, D, period),
-                estPos : estimateNextPosition(EP, S, H, period) >),
+                pos : updatePhysicalState(P, S, H, D, period) >),
         D
       ) .
 
