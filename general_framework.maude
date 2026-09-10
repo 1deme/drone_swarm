@@ -35,17 +35,8 @@ omod GENERAL-FRAMEWORK is
   op inCommunicationRange : Position Position -> Bool .
   op updatePhysicalState : Position Rat Dir Disturbance Rat  -> Position .
   op estimateNextPosition : Position Rat Dir Rat -> Position .
-  op isCollision : Position Position -> Bool .
   op crashThresholdSq : -> Rat .
   op possibleDisturbances : -> DisturbanceSet .
-
-  op perceiveEnvironment : Configuration -> Configuration .
-  eq perceiveEnvironment(none) = none .
-  eq perceiveEnvironment(< ID : Drone | pos : P, estPos : EP, belief : B > C) = 
-     (if hasReliablePerception(P) 
-      then < ID : Drone | pos : P, estPos : P, belief : 1/1 >
-      else < ID : Drone | pos : P, estPos : EP, belief : B > fi) 
-     perceiveEnvironment(C) .
 
   op broadcastAll : Configuration -> Configuration .
 
@@ -72,7 +63,7 @@ omod GENERAL-FRAMEWORK is
   op resolveCollisions : Configuration -> Configuration .
 
   crl [performSyncStep] : 
-      { C } => { broadcastAll(applyPhysics(resolveCollisions(thinkAll(perceiveEnvironment(C))), D)) } 
+      { C } => { broadcastAll(applyPhysics(resolveCollisions(thinkAll(C)), D)) } 
       if D ; DS := possibleDisturbances .
 
 endom

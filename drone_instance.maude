@@ -25,8 +25,6 @@ omod DRONE-INSTANCE is
 
   eq estimateNextPosition(EP, S, H, Period) = EP + (dirToVec(H) * (S * Period)) .
 
-  eq isCollision(P1, P2) = distSq(P1, P2) < 1/10 .
-
   eq crashThresholdSq = 1/10 .
 
   eq possibleDisturbances = 
