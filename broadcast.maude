@@ -1,28 +1,24 @@
 omod BROADCAST is
   protecting GENERAL-FRAMEWORK .
 
-  vars C-REM C-FIN C-CUR C-FULL MS : Configuration .
-  vars S-ID R-ID : Oid .
-  vars S-P S-EP R-P : Position .
-  vars S-B : Rat .
-  var M : Msg .
+  vars C-REM C-ALL : Configuration .
+  vars ID S-ID : Oid .
+  vars P S-P S-EP : Position .
+  var S-B : Rat .
 
-  eq broadcastAll(C-FULL) = bc-loop(C-FULL, C-FULL) .
+  op broadcastAll : Configuration -> Configuration .
+  eq broadcastAll(C-ALL) = updateAll(C-ALL, C-ALL) .
 
-  op bc-loop : Configuration Configuration -> Configuration .
-  eq bc-loop(none, C-CUR) = C-CUR .
-  
-  eq bc-loop((< S-ID : Drone | pos : S-P, estPos : S-EP, belief : S-B > C-REM), C-CUR) =
-     bc-loop(C-REM, deliver(msg(S-ID, S-EP, S-B), S-P, C-CUR, none)) .
+  op updateAll : Configuration Configuration -> Configuration .
+  eq updateAll(none, C-ALL) = none .
+  eq updateAll((< ID : Drone | pos : P > C-REM), C-ALL) =
+     < ID : Drone | inbox : collectMsgs(ID, P, C-ALL) > updateAll(C-REM, C-ALL) .
 
-  op deliver : Msg Position Configuration Configuration -> Configuration .
-  
-  eq deliver(msg(S-ID, S-EP, S-B), S-P, (< R-ID : Drone | pos : R-P, inbox : MS > C-REM), C-FIN) =
-     if (S-ID =/= R-ID) and inCommunicationRange(S-P, R-P) then
-        deliver(msg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Drone | inbox : (MS msg(S-ID, S-EP, S-B)), pos : R-P > C-FIN))
-     else
-        deliver(msg(S-ID, S-EP, S-B), S-P, C-REM, (< R-ID : Drone | pos : R-P, inbox : MS > C-FIN)) fi .
-        
-  eq deliver(M, S-P, none, C-FIN) = C-FIN .
-  
+  op collectMsgs : Oid Position Configuration -> Configuration .
+  eq collectMsgs(ID, P, none) = none .
+  eq collectMsgs(ID, P, (< S-ID : Drone | pos : S-P, estPos : S-EP, belief : S-B > C-REM)) =
+     (if (ID =/= S-ID) and inCommunicationRange(S-P, P) 
+      then msg(S-ID, S-EP, S-B) 
+      else none fi) collectMsgs(ID, P, C-REM) .
+
 endom

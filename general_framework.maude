@@ -18,7 +18,7 @@ omod GENERAL-FRAMEWORK is
   sort System .
   op { _ } : Configuration -> System [ctor] .
 
-  vars C C' Acc : Configuration . 
+  vars C C' ACC : Configuration . 
   var O : Object .
   vars P EP P' : Position .
   vars B S : Rat .
@@ -47,12 +47,12 @@ omod GENERAL-FRAMEWORK is
 
   op applyPhysicsAcc : Configuration Configuration Disturbance -> Configuration .
   
-  eq applyPhysicsAcc(none, Acc, D) = Acc .
+  eq applyPhysicsAcc(none, ACC, D) = ACC .
   
-  eq applyPhysicsAcc((< ID : Drone | pos : P, speed : S, heading : H > C), Acc, D) =
+  eq applyPhysicsAcc((< ID : Drone | pos : P, speed : S, heading : H > C), ACC, D) =
      applyPhysicsAcc(
         C, 
-        Acc (< ID : Drone | 
+        ACC (< ID : Drone | 
                 pos : updatePhysicalState(P, S, H, D, period) >),
         D
       ) .

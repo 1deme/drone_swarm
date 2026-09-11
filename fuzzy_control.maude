@@ -8,7 +8,7 @@ omod FUZZY-SPEED-CONTROL is
 
   vars O : Oid .
   vars P DP MyEP DangerEP : loc .
-  vars B MyB DangerB S1 S2 W Strength : Rat .
+  vars B MyB DANGER-B S1 S2 W Strength : Rat .
   var MS : Configuration .
   var M : Msg .
   var H : Dir3D .
@@ -40,13 +40,13 @@ omod FUZZY-SPEED-CONTROL is
   op goalCruise    : -> Rat . eq goalCruise    = 1/1 .
 
   op getWeightedSpeed : loc Dir3D Rat Msg -> Rat .
-  ceq getWeightedSpeed(P, H, B, msg(O, DP, DangerB)) = 
+  ceq getWeightedSpeed(P, H, B, msg(O, DP, DANGER-B)) = 
     ( (W1 * goalEmergency) + (W2 * goalLost) + (W3 * goalCaution) + (W4 * goalWary) + (W5 * goalCruise) ) / 
     (W1 + W2 + W3 + W4 + W5)
     if D   := distSq(P, DP)
-    /\ W1  := DangerB * muNear(D) * (if isClosing(P, H, DP) then 1/1 else 0/1 fi)
+    /\ W1  := DANGER-B * muNear(D) * (if isClosing(P, H, DP) then 1/1 else 0/1 fi)
     /\ W2  := muLost(B)
-    /\ W3  := DangerB * muNear(D) * muConfident(B)
+    /\ W3  := DANGER-B * muNear(D) * muConfident(B)
     /\ W4  := muWary(B)
     /\ W5  := muFar(D) * muConfident(B) .
 

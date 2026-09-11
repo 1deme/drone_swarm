@@ -17,6 +17,24 @@
 load load_all.maude
 
 ***
+*** test_ordering.maude
+***
+*** Layered test suite for the belief/estPos ordering fix.
+***
+*** METHOD: each layer is built ONLY from values produced by earlier layers.
+*** Nobody has to guess an expected answer: a later test is correct iff it
+*** equals a function of earlier printed outputs. Where a value is fully
+*** determined by arithmetic, it is written in the comment as [EXPECT ...].
+*** Where it depends on YOUR definition of projectBelief, it is written as
+*** [DERIVE: ...] and must be checked against the earlier printed value.
+***
+*** RUN WITH:   maude load_all.maude test_ordering.maude
+*** (or: load load_all.maude   then   load test_ordering.maude)
+***
+
+load load_all.maude
+
+***
 *** =====================================================================
 *** LAYER 0 - PRIMITIVES  (anchors: pure arithmetic, no model semantics)
 *** =====================================================================
@@ -366,5 +384,27 @@ search [1, 15] in SWARM-META-ANALYSIS :
   )
   =>* [ C:Configuration | N:Nat, IC:Nat ]
   such that meanEpistemicSuccess(C:Configuration, IC:Nat) < 7/10 .
+
+*** =====================================================================
+*** LAYER 8 - COLLISION FORECAST COVERS THE WHOLE PERIOD [0,1]
+*** =====================================================================
+*** Unclamped CPA time here is 11/10 > 1, but at t = 1 the drones are
+*** 1/10 apart (distSq 1/100 <= crashThresholdSq). Pre-fix this returned 2
+*** = no crash.
+*** L8.1  [EXPECT 1]  crash detected at the end of the period
+red in SWARM-ANALYSIS : checkSweptCollision(v(0,0,0), v(1/2,0,0), v(11/10,0,0), v(-1/2,0,0)) .
+
+*** L8.2  INVARIANT: no two surviving drones are ever within crashThresholdSq.
+***       Pre-fix: Solution (state 15, all-updraft path; the pair is 0.3
+***       apart at the end of round 3 and never removed).
+***       [EXPECT: No solution]
+search [1, 3] in SWARM-ANALYSIS :
+  { < d(1) : Drone | pos : v(0,0,0), estPos : v(0,0,0), goalPos : v(9/10,-17/10,0),
+                      belief : 1, speed : 0, heading : stop, inbox : none >
+    < d(2) : Drone | pos : v(21/10,0,0), estPos : v(21/10,0,0), goalPos : v(1/5,-14/5,2/5),
+                      belief : 1, speed : 0, heading : stop, inbox : none > }
+  =>* { < d(1) : Drone | pos : P1:loc, AS1:AttributeSet >
+        < d(2) : Drone | pos : P2:loc, AS2:AttributeSet > }
+  such that distSq(P1:loc, P2:loc) <= crashThresholdSq .
 
 red in SWARM-META-ANALYSIS : "== done ==" .
