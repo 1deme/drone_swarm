@@ -7,18 +7,18 @@ mod SWARM-ANALYSIS is
   var AS : AttributeSet .
 
   op MAaxSqDist : -> Rat .
-  eq MAaxSqDist = 2700/1 .
+  eq MAaxSqDist = 2700 .
 
   op TrustThreasholdSq : -> Rat .
-  eq TrustThreasholdSq = 25/1 .
+  eq TrustThreasholdSq = 25 .
 
   eq scoreDroneProgress(< OID : Drone | pos : P, goalPos : G, AS >) =
      if distSq(P, G) >= MAaxSqDist 
-     then 0/1 
-     else 1/1 - (distSq(P, G) / MAaxSqDist) fi .
+     then 0 
+     else 1 - (distSq(P, G) / MAaxSqDist) fi .
 
   eq scoreDroneEpistemic(< OID : Drone | pos : P, estPos : EP, AS >) =
      if distSq(P, EP) >= TrustThreasholdSq 
-     then 0/1
-     else 1/1 - (distSq(P, EP) / TrustThreasholdSq) fi .
+     then 0
+     else 1 - (distSq(P, EP) / TrustThreasholdSq) fi .
 endm
