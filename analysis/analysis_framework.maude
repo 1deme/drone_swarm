@@ -1,0 +1,33 @@
+mod ANALYSIS-FRAMEWORK is
+  protecting NAT .
+  protecting RAT .
+  protecting GENERAL-FRAMEWORK .
+
+  vars C : Configuration .
+  var OID : Oid .
+  var AS : AttributeSet .
+  var N : Nat .
+
+  op scoreDroneProgress : Object -> Rat .
+  op scoreDroneEpistemic : Object -> Rat .
+
+  op countDrones : Configuration -> Nat .
+  eq countDrones(< OID : Drone | AS > C) = 1 + countDrones(C) .
+  eq countDrones(C) = 0 [owise] .
+
+  op sumSwarmSuccess : Configuration -> Rat .
+  eq sumSwarmSuccess(none) = 0/1 .
+  eq sumSwarmSuccess(< OID : Drone | AS > C) = 
+     scoreDroneProgress(< OID : Drone | AS >) + sumSwarmSuccess(C) .
+
+  op swarmSuccess : Configuration Nat -> Rat .
+  eq swarmSuccess(C, N) = sumSwarmSuccess(C) / N .
+
+  op sumEpistemicSuccess : Configuration -> Rat .
+  eq sumEpistemicSuccess(none) = 0/1 .
+  eq sumEpistemicSuccess(< OID : Drone | AS > C) = 
+     scoreDroneEpistemic(< OID : Drone | AS >) + sumEpistemicSuccess(C) .
+
+  op meanEpistemicSuccess : Configuration Nat -> Rat .
+  eq meanEpistemicSuccess(C, N) = sumEpistemicSuccess(C) / N .
+endm

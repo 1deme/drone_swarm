@@ -1,0 +1,78 @@
+omod PREDICTIVE-CRASH is
+  protecting GENERAL-FRAMEWORK . 
+  protecting GEOMETRY .
+  protecting RAT .
+  protecting BOOL .
+
+  subsort loc < Position .
+  subsort Dir3D < Dir .
+
+  sort CrashEvent .
+  op noCrash : -> CrashEvent [ctor] .
+  op crashAt : Oid Oid Rat -> CrashEvent [ctor] .
+
+  vars O1 O2 O3 O4 : Oid .
+  var Obj : Object . 
+  var CE2 : CrashEvent . 
+  
+  vars P1 P2 V1 V2 PREL VREL : loc .
+  vars S1 S2 T T1 T2 CPA DistSq : Rat . 
+  vars H1 H2 : Dir3D .
+  vars X1 X2 Y1 Y2 Z1 Z2 : Rat .
+  vars AS1 AS2 : AttributeSet .
+  var C : Configuration .
+
+  op getVelocity : Rat Dir3D -> loc .
+  eq getVelocity(S1, H1) = dirToVec(H1) * (S1 * period) .
+
+  op calcCpaTime : loc loc -> Rat .
+  ceq calcCpaTime(PREL, VREL) = - dotProd(PREL, VREL) / dotProd(VREL, VREL) 
+    if dotProd(VREL, VREL) =/= 0/1 .
+  eq calcCpaTime(PREL, VREL) = 0/1 [owise] . 
+
+  op clampToPeriod : Rat -> Rat .
+  eq clampToPeriod(T) = if T < 0/1 then 0/1 else (if T > 1/1 then 1/1 else T fi) fi .
+
+  op checkSweptCollision : loc loc loc loc -> Rat .
+  ceq checkSweptCollision(P1, V1, P2, V2) = CPA
+      if PREL := P1 - P2
+      /\ VREL := V1 - V2
+      /\ CPA := clampToPeriod(calcCpaTime(PREL, VREL))
+      /\ DistSq := distSq(P1 + (V1 * CPA), P2 + (V2 * CPA))
+      /\ DistSq <= crashThresholdSq .
+  eq checkSweptCollision(P1, V1, P2, V2) = 2/1 [owise] .
+    
+  op minCrash : CrashEvent CrashEvent -> CrashEvent .
+  eq minCrash(noCrash, CE2) = CE2 .
+  eq minCrash(crashAt(O1, O2, T1), noCrash) = crashAt(O1, O2, T1) .
+  eq minCrash(crashAt(O1, O2, T1), crashAt(O3, O4, T2)) = 
+     if T1 <= T2 then crashAt(O1, O2, T1) else crashAt(O3, O4, T2) fi .
+
+  op findEarliestCrash : Configuration -> CrashEvent .
+  eq findEarliestCrash(none) = noCrash .
+  eq findEarliestCrash(Obj C) = minCrash( checkAllPairs(Obj, C), findEarliestCrash(C) ) .
+
+  op checkAllPairs : Object Configuration -> CrashEvent .
+  eq checkAllPairs(Obj, none) = noCrash .
+  ceq checkAllPairs(< O1 : Drone | pos : P1, speed : S1, heading : H1, AS1 >, 
+                    < O2 : Drone | pos : P2, speed : S2, heading : H2, AS2 > C) =
+      minCrash(
+        if T <= 1/1 then crashAt(O1, O2, T) else noCrash fi,
+        checkAllPairs(< O1 : Drone | pos : P1, speed : S1, heading : H1, AS1 >, C)
+      )
+    if V1 := getVelocity(S1, H1)
+    /\ V2 := getVelocity(S2, H2)
+    /\ T := checkSweptCollision(P1, V1, P2, V2) .
+  eq checkAllPairs(Obj, C) = noCrash [owise] .
+
+  op removeDrones : Configuration Oid Oid -> Configuration .
+  eq removeDrones(< O1 : Drone | AS1 > < O2 : Drone | AS2 > C, O1, O2) = C .
+  eq removeDrones(C, O1, O2) = C [owise] .
+
+  op resolveCollisions : Configuration -> Configuration .
+  ceq resolveCollisions(C) = 
+      resolveCollisions( removeDrones(C, O1, O2) )
+      if crashAt(O1, O2, T) := findEarliestCrash(C) .
+  eq resolveCollisions(C) = C [owise] .
+
+endom

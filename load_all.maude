@@ -1,15 +1,15 @@
-load general_framework.maude
-load broadcast.maude
-load drone_brain.maude
+load framework/general_framework.maude
+load framework/broadcast.maude
+load framework/drone_brain.maude
 
-load geometry.maude
-load predictive_crash.maude
-load fuzzy_control.maude
-load fusion_logic.maude
+load case-study/geometry.maude
+load case-study/predictive_crash.maude
+load case-study/fuzzy_control.maude
+load case-study/fusion_logic.maude
 
-load drone_instance.maude
+load case-study/drone_instance.maude
 
-load analysis_framework.maude
-load swarm_analysis.maude
+load analysis/analysis_framework.maude
+load analysis/swarm_analysis.maude
 
-load meta-tracker.maude
+load analysis/meta-tracker.maude
