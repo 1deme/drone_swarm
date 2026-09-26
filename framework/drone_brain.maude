@@ -2,36 +2,60 @@ mod DRONE-BRAIN is
   protecting BROADCAST .
   protecting GENERAL-FRAMEWORK .
 
-  vars P P2 G EP NEW-EP FUSED-EP PROJ-EP LEADER-P : Position .
+  vars P P2 G EP NEW-EP FUSED-EP CURR-EP LEADER-P : Position .
   vars O O2 : Oid .
-  vars B B2 S currDist nextDist NEW-B FUSED-B PROJ-B NEW-S LEADER-B : Rat .
+  vars B B2 S currDist nextDist NEW-B FUSED-B CURR-B NEW-S LEADER-B : Rat .
   vars H H1 H2 NEW-H : Dir .
   var AS : AttributeSet .
   var MS : Configuration .
   var M BEST-MSG : Msg .
 
 
+  *** Phase (i). At the time this step takes place, pos and estPos still hold
+  *** the values they had when the previous step took place, and inbox holds
+  *** the messages broadcast then. Each message reports the sender's estimate
+  *** of its position at that same instant, so the receiver's own estimate and
+  *** the reported ones refer to one and the same time and are fused directly.
+  *** A reliable position signal at that instant is authoritative and overrides
+  *** the fusion, so an exact estimate cannot be pulled away by less reliable
+  *** neighbours. The messages are kept for the decision phase, where the
+  *** speed controller also consults them.
   op think : Object -> Object .
-  ceq think(< O : Drone 
+  ceq think(< O : Drone
   | pos : P, estPos : EP, goalPos : G, belief : B, speed : S, heading : H, inbox : MS >) =
       < O : Drone | pos : P,
-                    estPos : PROJ-EP,
+                    estPos : FUSED-EP,
                     goalPos : G,
-                    belief : PROJ-B,
-                    speed : NEW-S, 
+                    belief : FUSED-B,
+                    speed : S,
+                    heading : H,
+                    inbox : MS >
+      if FUSED-EP := (if hasReliablePerception(P) then P else calcEstPos(EP, B, MS) fi)
+      /\ FUSED-B  := (if hasReliablePerception(P) then 1 else calcBelief(B, EP, MS) fi) .
+
+  *** Phase (iv). applyPhysics has now advanced pos and estPos to the instant
+  *** at which this step takes place. If a reliable position signal is
+  *** available here and now, it replaces the dead-reckoned estimate. The drone
+  *** then chooses the heading and speed for the period that begins now, from
+  *** the estimate of where it is now.
+  op decide : Object -> Object .
+  ceq decide(< O : Drone
+  | pos : P, estPos : EP, goalPos : G, belief : B, speed : S, heading : H, inbox : MS >) =
+      < O : Drone | pos : P,
+                    estPos : CURR-EP,
+                    goalPos : G,
+                    belief : CURR-B,
+                    speed : NEW-S,
                     heading : NEW-H,
                     inbox : none >
-      if FUSED-EP := (if hasReliablePerception(P) then P else calcEstPos(EP, B, MS) fi)
-      /\ FUSED-B  := (if hasReliablePerception(P) then 1/1 else calcBelief(B, EP, MS) fi)
-      /\ NEW-H    := bestDir(FUSED-EP, G)
-      /\ NEW-S    := calcSpeed(FUSED-EP, NEW-H, FUSED-B, MS)
-      /\ PROJ-EP  := estimateNextPosition(FUSED-EP, NEW-S, NEW-H, period)
-      /\ PROJ-B   := projectBelief(FUSED-B, period) .
+      if CURR-EP := (if hasReliablePerception(P) then P else EP fi)
+      /\ CURR-B  := (if hasReliablePerception(P) then 1 else B fi)
+      /\ NEW-H   := bestDir(CURR-EP, G)
+      /\ NEW-S   := calcSpeed(CURR-EP, NEW-H, CURR-B, MS) .
 
-op projectBelief : Rat Rat -> Rat .      
   op calcBelief : Rat Position Configuration -> Rat .
   op calcEstPos : Position Rat Configuration -> Position .
   op calcSpeed : Position Dir Rat Configuration -> Rat .
   op bestDir : Position Position -> Dir .
-  
+
 endm

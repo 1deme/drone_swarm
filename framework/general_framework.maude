@@ -35,25 +35,44 @@ omod GENERAL-FRAMEWORK is
   op inCommunicationRange : Position Position -> Bool .
   op updatePhysicalState : Position Rat Dir Disturbance Rat  -> Position .
   op estimateNextPosition : Position Rat Dir Rat -> Position .
+  op projectBelief : Rat Rat -> Rat .
   op crashThresholdSq : -> Rat .
   op possibleDisturbances : -> DisturbanceSet .
 
   op broadcastAll : Configuration -> Configuration .
 
+  *** Phase (i): reconstruct where the drone was when the PREVIOUS step took
+  *** place, by fusing its own estimate for that instant with the messages it
+  *** received, which report the senders' estimates for that same instant.
   op thinkAll : Configuration -> Configuration .
-  op think : Object -> Object . 
+  op think : Object -> Object .
   eq thinkAll(none) = none .
   eq thinkAll(O C) = think(O) thinkAll(C) .
 
+  *** Phase (iv): having been advanced to the current instant by applyPhysics,
+  *** choose the heading and speed for the period that now begins.
+  op decideAll : Configuration -> Configuration .
+  op decide : Object -> Object .
+  eq decideAll(none) = none .
+  eq decideAll(O C) = decide(O) decideAll(C) .
+
+  *** Phase (iii): advance ground truth and perception over the SAME period.
+  *** pos is displaced by the unobservable disturbance D, estPos is not; the
+  *** truth/perception gap is exactly this difference. Both the physical and
+  *** the estimated update use the heading and speed chosen one step earlier,
+  *** i.e. the velocity that was in force throughout the elapsed period.
   op applyPhysicsAcc : Configuration Configuration Disturbance -> Configuration .
-  
+
   eq applyPhysicsAcc(none, ACC, D) = ACC .
-  
-  eq applyPhysicsAcc((< ID : Drone | pos : P, speed : S, heading : H > C), ACC, D) =
+
+  eq applyPhysicsAcc((< ID : Drone | pos : P, estPos : EP, belief : B,
+                                     speed : S, heading : H > C), ACC, D) =
      applyPhysicsAcc(
-        C, 
-        ACC (< ID : Drone | 
-                pos : updatePhysicalState(P, S, H, D, period) >),
+        C,
+        ACC (< ID : Drone |
+                pos    : updatePhysicalState(P, S, H, D, period),
+                estPos : estimateNextPosition(EP, S, H, period),
+                belief : projectBelief(B, period) >),
         D
       ) .
 
@@ -62,8 +81,9 @@ omod GENERAL-FRAMEWORK is
 
   op resolveCollisions : Configuration -> Configuration .
 
-  crl [performSyncStep] : 
-      { C } => { broadcastAll(applyPhysics(resolveCollisions(thinkAll(C)), D)) } 
+  crl [performSyncStep] :
+      { C } =>
+      { broadcastAll(decideAll(applyPhysics(resolveCollisions(thinkAll(C)), D))) }
       if D ; DS := possibleDisturbances .
 
 endom

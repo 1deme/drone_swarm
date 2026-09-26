@@ -3,12 +3,11 @@
 ***
 *** Two complete worked examples from the paper "A Formal Framework for
 *** Synchronized Drone Swarms with Belief-Based Reinforcement" (Sections
-*** 5.2, 5.3, and 5.4). Each example is fully self-contained: the initial
+*** 5.2 and 5.3). Each example is fully self-contained: the initial
 *** configuration and the verification queries below, with the expected
 *** result noted in a comment above each one.
 ***
-*** RUN WITH:  maude load_all.maude example.maude
-*** (or:       load load_all.maude   then   load example.maude)
+*** RUN WITH:  maude example.maude
 ***
 
 load ../load_all.maude
@@ -18,13 +17,14 @@ load ../load_all.maude
 *** EXAMPLE 1 - MISSION AND EPISTEMIC VERIFICATION FROM PERFECT KNOWLEDGE
 *** =====================================================================
 *** Three drones start with belief 1 and estPos = pos: nothing about the
-*** swarm's own state is unknown at t=0. They start mutually within
-*** communication range and then fly to separate goals. The
-*** truth/perception gap that develops is produced entirely by the model:
-*** unobservable wind displaces pos while estimateNextPosition advances
-*** estPos without it, and WCL fusion pulls an estimate toward the
-*** neighbours' centroid whenever a drone hears two neighbours (a single
-*** 49/50 report alone can never reach trustThreshold).
+*** swarm's own state is unknown at t=0. d(1) starts within communication
+*** range of both d(2) and d(3), which are NOT within range of each other;
+*** they then fly to separate goals. The truth/perception gap that develops
+*** is produced entirely by the model: unobservable wind displaces pos while
+*** estimateNextPosition advances estPos without it, and WCL fusion pulls an
+*** estimate toward the neighbours' centroid whenever a drone hears two
+*** neighbours. A single 49/50 report alone can never reach trustThreshold,
+*** so only d(1) ever fuses.
 ***
 
 red in SWARM-META-ANALYSIS : "== Example 1: mission and epistemic verification ==" .
@@ -32,17 +32,17 @@ red in SWARM-META-ANALYSIS : "== Example 1: mission and epistemic verification =
 *** Only d(1), which hears two neighbours, ever fuses: its estPos leaves
 *** its true position, while d(2) and d(3) stay exact.
 rew [2] in SWARM-META-ANALYSIS :
-  { < d(1) : Drone | pos : v(0,0,0), estPos : v(0,0,0), goalPos : v(16,0,0), belief : 1/1, speed : 1/1, heading : E, inbox : none >
-    < d(2) : Drone | pos : v(3,3,0), estPos : v(3,3,0), goalPos : v(-13,4,0), belief : 1/1, speed : 1/1, heading : W, inbox : none >
-    < d(3) : Drone | pos : v(3,-3,0), estPos : v(3,-3,0), goalPos : v(19,-4,0), belief : 1/1, speed : 1/1, heading : E, inbox : none > } .
+  { < d(1) : Drone | pos : v(0,0,0), estPos : v(0,0,0), goalPos : v(16,0,0), belief : 1, speed : 1, heading : E, inbox : none >
+    < d(2) : Drone | pos : v(3,3,0), estPos : v(3,3,0), goalPos : v(-13,4,0), belief : 1, speed : 1, heading : W, inbox : none >
+    < d(3) : Drone | pos : v(3,-3,0), estPos : v(3,-3,0), goalPos : v(19,-4,0), belief : 1, speed : 1, heading : E, inbox : none > } .
 
 *** Mission bound: 10 rounds are NOT enough (paper's Section 5.2 query).
 *** [EXPECT: Solution, the counter-example printed in the paper]
 search [1,10] in SWARM-META-ANALYSIS :
   initAnalysis(
-    < d(1) : Drone | pos : v(0,0,0), estPos : v(0,0,0), goalPos : v(16,0,0), belief : 1/1, speed : 1/1, heading : E, inbox : none >
-    < d(2) : Drone | pos : v(3,3,0), estPos : v(3,3,0), goalPos : v(-13,4,0), belief : 1/1, speed : 1/1, heading : W, inbox : none >
-    < d(3) : Drone | pos : v(3,-3,0), estPos : v(3,-3,0), goalPos : v(19,-4,0), belief : 1/1, speed : 1/1, heading : E, inbox : none >
+    < d(1) : Drone | pos : v(0,0,0), estPos : v(0,0,0), goalPos : v(16,0,0), belief : 1, speed : 1, heading : E, inbox : none >
+    < d(2) : Drone | pos : v(3,3,0), estPos : v(3,3,0), goalPos : v(-13,4,0), belief : 1, speed : 1, heading : W, inbox : none >
+    < d(3) : Drone | pos : v(3,-3,0), estPos : v(3,-3,0), goalPos : v(19,-4,0), belief : 1, speed : 1, heading : E, inbox : none >
   )
   =>* [ C:Configuration | N:Nat, IC:Nat ]
   such that N:Nat >= 10 and not metaObjectiveAccomplished(C:Configuration, IC:Nat) .
@@ -51,9 +51,9 @@ search [1,10] in SWARM-META-ANALYSIS :
 *** [EXPECT: No solution]
 search [1,11] in SWARM-META-ANALYSIS :
   initAnalysis(
-    < d(1) : Drone | pos : v(0,0,0), estPos : v(0,0,0), goalPos : v(16,0,0), belief : 1/1, speed : 1/1, heading : E, inbox : none >
-    < d(2) : Drone | pos : v(3,3,0), estPos : v(3,3,0), goalPos : v(-13,4,0), belief : 1/1, speed : 1/1, heading : W, inbox : none >
-    < d(3) : Drone | pos : v(3,-3,0), estPos : v(3,-3,0), goalPos : v(19,-4,0), belief : 1/1, speed : 1/1, heading : E, inbox : none >
+    < d(1) : Drone | pos : v(0,0,0), estPos : v(0,0,0), goalPos : v(16,0,0), belief : 1, speed : 1, heading : E, inbox : none >
+    < d(2) : Drone | pos : v(3,3,0), estPos : v(3,3,0), goalPos : v(-13,4,0), belief : 1, speed : 1, heading : W, inbox : none >
+    < d(3) : Drone | pos : v(3,-3,0), estPos : v(3,-3,0), goalPos : v(19,-4,0), belief : 1, speed : 1, heading : E, inbox : none >
   )
   =>* [ C:Configuration | N:Nat, IC:Nat ]
   such that N:Nat >= 11 and not metaObjectiveAccomplished(C:Configuration, IC:Nat) .
@@ -62,9 +62,9 @@ search [1,11] in SWARM-META-ANALYSIS :
 *** rounds (paper's Section 5.3 query).  [EXPECT: No solution]
 search [1,12] in SWARM-META-ANALYSIS :
   initAnalysis(
-    < d(1) : Drone | pos : v(0,0,0), estPos : v(0,0,0), goalPos : v(16,0,0), belief : 1/1, speed : 1/1, heading : E, inbox : none >
-    < d(2) : Drone | pos : v(3,3,0), estPos : v(3,3,0), goalPos : v(-13,4,0), belief : 1/1, speed : 1/1, heading : W, inbox : none >
-    < d(3) : Drone | pos : v(3,-3,0), estPos : v(3,-3,0), goalPos : v(19,-4,0), belief : 1/1, speed : 1/1, heading : E, inbox : none >
+    < d(1) : Drone | pos : v(0,0,0), estPos : v(0,0,0), goalPos : v(16,0,0), belief : 1, speed : 1, heading : E, inbox : none >
+    < d(2) : Drone | pos : v(3,3,0), estPos : v(3,3,0), goalPos : v(-13,4,0), belief : 1, speed : 1, heading : W, inbox : none >
+    < d(3) : Drone | pos : v(3,-3,0), estPos : v(3,-3,0), goalPos : v(19,-4,0), belief : 1, speed : 1, heading : E, inbox : none >
   )
   =>* [ C:Configuration | N:Nat, IC:Nat ]
   such that meanEpistemicSuccess(C:Configuration, IC:Nat) < 9/10 .
@@ -73,9 +73,9 @@ search [1,12] in SWARM-META-ANALYSIS :
 *** counter-example.  [EXPECT: Solution]
 search [1,12] in SWARM-META-ANALYSIS :
   initAnalysis(
-    < d(1) : Drone | pos : v(0,0,0), estPos : v(0,0,0), goalPos : v(16,0,0), belief : 1/1, speed : 1/1, heading : E, inbox : none >
-    < d(2) : Drone | pos : v(3,3,0), estPos : v(3,3,0), goalPos : v(-13,4,0), belief : 1/1, speed : 1/1, heading : W, inbox : none >
-    < d(3) : Drone | pos : v(3,-3,0), estPos : v(3,-3,0), goalPos : v(19,-4,0), belief : 1/1, speed : 1/1, heading : E, inbox : none >
+    < d(1) : Drone | pos : v(0,0,0), estPos : v(0,0,0), goalPos : v(16,0,0), belief : 1, speed : 1, heading : E, inbox : none >
+    < d(2) : Drone | pos : v(3,3,0), estPos : v(3,3,0), goalPos : v(-13,4,0), belief : 1, speed : 1, heading : W, inbox : none >
+    < d(3) : Drone | pos : v(3,-3,0), estPos : v(3,-3,0), goalPos : v(19,-4,0), belief : 1, speed : 1, heading : E, inbox : none >
   )
   =>* [ C:Configuration | N:Nat, IC:Nat ]
   such that meanEpistemicSuccess(C:Configuration, IC:Nat) < 95/100 .
@@ -84,9 +84,9 @@ search [1,12] in SWARM-META-ANALYSIS :
 *** [EXPECT: No solution]
 search [1,12] in SWARM-META-ANALYSIS :
   initAnalysis(
-    < d(1) : Drone | pos : v(0,0,0), estPos : v(0,0,0), goalPos : v(16,0,0), belief : 1/1, speed : 1/1, heading : E, inbox : none >
-    < d(2) : Drone | pos : v(3,3,0), estPos : v(3,3,0), goalPos : v(-13,4,0), belief : 1/1, speed : 1/1, heading : W, inbox : none >
-    < d(3) : Drone | pos : v(3,-3,0), estPos : v(3,-3,0), goalPos : v(19,-4,0), belief : 1/1, speed : 1/1, heading : E, inbox : none >
+    < d(1) : Drone | pos : v(0,0,0), estPos : v(0,0,0), goalPos : v(16,0,0), belief : 1, speed : 1, heading : E, inbox : none >
+    < d(2) : Drone | pos : v(3,3,0), estPos : v(3,3,0), goalPos : v(-13,4,0), belief : 1, speed : 1, heading : W, inbox : none >
+    < d(3) : Drone | pos : v(3,-3,0), estPos : v(3,-3,0), goalPos : v(19,-4,0), belief : 1, speed : 1, heading : E, inbox : none >
   )
   =>* [ C:Configuration | N:Nat, IC:Nat ]
   such that countDrones(C:Configuration) < IC:Nat .
@@ -96,6 +96,7 @@ search [1,12] in SWARM-META-ANALYSIS :
 *** =====================================================================
 *** EXAMPLE 2 - VERIFIED MINIMUM SAFE SEPARATION (head-on tracks)
 *** =====================================================================
+*** Internal regression test, not part of the paper.
 *** Two drones on parallel head-on tracks, separated laterally by delta.
 *** Analytically they collide iff delta^2 <= crashThresholdSq = 1/10. The
 *** fuzzy controller does NOT prevent this on its own: muNear only engages
@@ -103,15 +104,19 @@ search [1,12] in SWARM-META-ANALYSIS :
 *** verified guarantee here comes from separation, not graceful
 *** degradation alone.
 ***
+*** NOTE: the second query below explores the full disturbance tree to depth
+*** 12 without pruning, since neither drone reaches its goal within the
+*** bound. It takes a couple of minutes.
+***
 
 red in SWARM-META-ANALYSIS : "== Example 2: verified minimum safe separation ==" .
 
 *** delta = 3/10, so delta^2 = 9/100 < 1/10: too close, they collide.
-*** [EXPECT: Solution]
+*** [EXPECT: Solution, at N = 7]
 search [1,12] in SWARM-META-ANALYSIS :
   initAnalysis(
-    < d(1) : Drone | pos : v(8,15,15), estPos : v(8,15,15), goalPos : v(24,15,15), belief : 1/1, speed : 1/1, heading : E, inbox : none >
-    < d(2) : Drone | pos : v(22,153/10,15), estPos : v(22,153/10,15), goalPos : v(6,153/10,15), belief : 1/1, speed : 1/1, heading : W, inbox : none >
+    < d(1) : Drone | pos : v(8,15,15), estPos : v(8,15,15), goalPos : v(24,15,15), belief : 1, speed : 1, heading : E, inbox : none >
+    < d(2) : Drone | pos : v(22,153/10,15), estPos : v(22,153/10,15), goalPos : v(6,153/10,15), belief : 1, speed : 1, heading : W, inbox : none >
   )
   =>* [ C:Configuration | N:Nat, IC:Nat ]
   such that countDrones(C:Configuration) < IC:Nat .
@@ -120,8 +125,8 @@ search [1,12] in SWARM-META-ANALYSIS :
 *** [EXPECT: No solution]
 search [1,12] in SWARM-META-ANALYSIS :
   initAnalysis(
-    < d(1) : Drone | pos : v(8,15,15), estPos : v(8,15,15), goalPos : v(24,15,15), belief : 1/1, speed : 1/1, heading : E, inbox : none >
-    < d(2) : Drone | pos : v(22,46/3,15), estPos : v(22,46/3,15), goalPos : v(6,46/3,15), belief : 1/1, speed : 1/1, heading : W, inbox : none >
+    < d(1) : Drone | pos : v(8,15,15), estPos : v(8,15,15), goalPos : v(24,15,15), belief : 1, speed : 1, heading : E, inbox : none >
+    < d(2) : Drone | pos : v(22,46/3,15), estPos : v(22,46/3,15), goalPos : v(6,46/3,15), belief : 1, speed : 1, heading : W, inbox : none >
   )
   =>* [ C:Configuration | N:Nat, IC:Nat ]
   such that countDrones(C:Configuration) < IC:Nat .
